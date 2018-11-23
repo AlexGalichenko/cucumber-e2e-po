@@ -4,7 +4,7 @@
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
-    "docs": "jsdoc ./framework/ -r -t ./node_modules/minami"
+    "docs": "jsdoc ./src/ -r -t ./node_modules/minami"
   },
   "keywords": [
     "cucumber",
@@ -15,9 +15,6 @@
   ],
   "author": "Alexander Galichenko",
   "license": "MIT",
-  "dependencies": {
-    "protractor": "^5.4.1"
-  },
   "devDependencies": {
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3"

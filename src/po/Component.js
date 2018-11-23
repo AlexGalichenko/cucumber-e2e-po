@@ -8,28 +8,28 @@ class Component extends AbstractPage {
 
     /**
      * Constructor of component or collection of components
-     * @param {string} alias - alias of Collection
-     * @param {string} selector - selector
-     * @param {boolean} [isCollection] - isCollection flag
-     * @param {string} [selectorType] - selector type (css, cssContainingText, xpath)
-     * @param {string} [text] - text for cssContainingText
+     * @param {string} component.alias - alias of Collection
+     * @param {string} component.selector - selector
+     * @param {boolean} [component.isCollection] - isCollection flag
+     * @param {string} [component.selectorType] - selector type (css, cssContainingText, xpath)
+     * @param {string} [component.text] - text for cssContainingText
      */
-    constructor(alias, selector, isCollection = false, selectorType = "css", text = "") {
+    constructor(component) {
         super();
 
-        if (!alias) {
+        if (!component.alias) {
             throw new Error(`Alias of ${this.constructor.name} is not defined`)
         }
 
-        if (!selector) {
+        if (!component.selector) {
             throw new Error(`Selector of ${this.constructor.name} is not defined`)
         }
 
-        this.alias = alias;
-        this.selector = selector;
-        this.selectorType = selectorType;
-        this.text = text;
-        this.isCollection = isCollection;
+        this.alias = component.alias;
+        this.selector = component.selector;
+        this.selectorType = component.selectorType || "css";
+        this.text = component.text ? component.text : "";
+        this.isCollection = !!component.isCollection;
     }
 
 }

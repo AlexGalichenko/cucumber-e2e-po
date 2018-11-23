@@ -8,13 +8,13 @@ class Collection extends Element {
 
     /**
      * Constructor of collection
-     * @param {string} alias - alias of Collection
-     * @param {string} selector - selector
-     * @param {string} [selectorType] - selector type (css, cssContainingText, xpath)
-     * @param {string} [text] - text for cssContainingText
+     * @param {string} collection.alias - alias of Collection
+     * @param {string} collection.selector - selector
+     * @param {string} [collection.selectorType] - selector type (css, cssContainingText, xpath)
+     * @param {string} [collection.text] - text for cssContainingText
      */
-    constructor(alias, selector, selectorType = "css", text = "") {
-        super(alias, selector, selectorType, text);
+    constructor(collection) {
+        super(collection);
         this.isCollection = true;
     }
 

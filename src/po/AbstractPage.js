@@ -1,4 +1,3 @@
-const Memory = require("../memory/Memory");
 const Element = require("./Element");
 const Collection = require("./Collection");
 
@@ -14,38 +13,47 @@ class AbstractPage {
 
     /**
      * Define element on page
-     * @param {string} alias - alias
-     * @param {string} selector - selector
-     * @param {string} [selectorType] - selector type (css, cssContainingText, xpath) (default css)
-     * @param {string} [text] - text (for cssContainingText selector type)
+     * @param {string} element.alias - alias
+     * @param {string} element.selector - selector
+     * @param {string} [element.selectorType] - selector type (css, cssContainingText, xpath) (default css)
+     * @param {string} [element.text] - text (for cssContainingText selector type)
      * @example
      * class Page extends AbstractPage {
      *   constructor() {
      *     super();
-     *     this.defineElement("YourElement", "div > div", "cssContainingText", "some text");
+     *     this.defineElement({
+     *         alias: "YourElement",
+     *         selector: "div > div",
+     *         selectorType: "cssContainingText",
+     *         text: "some text"});
      *   }
      * }
      */
-    defineElement(alias, selector, selectorType, text) {
-        this.elements.set(alias, new Element(alias, selector, selectorType, text));
+    defineElement(element) {
+        this.elements.set(element.alias, new Element(element));
     }
 
     /**
      * Define collection on page
-     * @param {string} alias - alias
-     * @param {string} selector - selector
-     * @param {string} [selectorType] - selector type (css, cssContainingText, xpath) (default css)
-     * @param {string} [text] - text (for cssContainingText selector type)
+     * @param {string} collection.alias - alias
+     * @param {string} collection.selector - selector
+     * @param {string} [collection.selectorType] - selector type (css, cssContainingText, xpath) (default css)
+     * @param {string} [collection.text] - text (for cssContainingText selector type)
      * @example
      * class Page extends AbstractPage {
      *   constructor() {
      *     super();
-     *     this.defineCollection("YourCollection", "div > div", "cssContainingText", "some text")
+     *     this.defineCollection({
+     *         alias: "YourCollection",
+     *         selector: "div > div",
+     *         selectorType: "cssContainingText",
+     *         text: "some text"});
+     *   }
      *   }
      * }
      */
-    defineCollection(alias, selector, selectorType, text) {
-        this.elements.set(alias, new Collection(alias, selector, selectorType, text));
+    defineCollection(collection) {
+        this.elements.set(collection.alias, new Collection(collection));
     }
 
     /**
@@ -260,10 +268,10 @@ class ParsedToken {
         const ELEMENT_OF_COLLECTION_REGEXP = /#([!\$]?.+)\s+(in|of)\s+(.+)/;
         if (ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
             const parsedTokens = token.match(ELEMENT_OF_COLLECTION_REGEXP);
-            const rememberedValue = Memory.parseValue(parsedTokens[1]);
+            const value = parsedTokens[1];
 
-            this.index = parsedTokens[2] === "of" ? Number.parseInt(rememberedValue) : undefined;
-            this.innerText = parsedTokens[2] === "in" ? rememberedValue : undefined;
+            this.index = parsedTokens[2] === "of" ? Number.parseInt(value) : undefined;
+            this.innerText = parsedTokens[2] === "in" ? value : undefined;
             this.alias = parsedTokens[3];
         } else {
             this.alias = token;
