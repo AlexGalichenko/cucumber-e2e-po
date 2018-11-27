@@ -1,4 +1,3 @@
-const Memory = require("../memory/Memory");
 const Element = require("./Element");
 const Collection = require("./Collection");
 
@@ -14,58 +13,71 @@ class AbstractPage {
 
     /**
      * Define element on page
-     * @param {string} alias - alias
-     * @param {string} selector - selector
-     * @param {string} [selectorType] - selector type (css, cssContainingText, xpath) (default css)
-     * @param {string} [text] - text (for cssContainingText selector type)
+     * @param {string} element.alias - alias
+     * @param {string} element.selector - selector
+     * @param {string} [element.selectorType] - selector type (css, cssContainingText, xpath) (default css)
+     * @param {string} [element.text] - text (for cssContainingText selector type)
      * @example
      * class Page extends AbstractPage {
      *   constructor() {
      *     super();
-     *     this.defineElement("YourElement", "div > div", "cssContainingText", "some text");
-     *   }
+     *     this.defineElement({
+     *         alias: "YourElement",
+     *         selector: "div > div",
+     *         selectorType: "cssContainingText",
+     *         text: "some text"});
+     *     }
      * }
      */
-    defineElement(alias, selector, selectorType, text) {
-        this.elements.set(alias, new Element(alias, selector, selectorType, text));
+    defineElement(element) {
+        this.elements.set(element.alias, new Element(element));
     }
 
     /**
      * Define collection on page
-     * @param {string} alias - alias
-     * @param {string} selector - selector
-     * @param {string} [selectorType] - selector type (css, cssContainingText, xpath) (default css)
-     * @param {string} [text] - text (for cssContainingText selector type)
+     * @param {string} collection.alias - alias
+     * @param {string} collection.selector - selector
+     * @param {string} [collection.selectorType] - selector type (css, cssContainingText, xpath) (default css)
+     * @param {string} [collection.text] - text (for cssContainingText selector type)
      * @example
      * class Page extends AbstractPage {
      *   constructor() {
      *     super();
-     *     this.defineCollection("YourCollection", "div > div", "cssContainingText", "some text")
+     *     this.defineCollection({
+     *         alias: "YourCollection",
+     *         selector: "div > div",
+     *         selectorType: "cssContainingText",
+     *         text: "some text"});
+     *     }
      *   }
      * }
      */
-    defineCollection(alias, selector, selectorType, text) {
-        this.elements.set(alias, new Collection(alias, selector, selectorType, text));
+    defineCollection(collection) {
+        this.elements.set(collection.alias, new Collection(collection));
     }
 
     /**
      * Define component on page
-     * @param {string|Component} aliasOrComponent - alias or component
-     * @param {Component} [component] - component
+     * @param {string} [component.alias] - alias or component
+     * @param {Component} component.component - component
      * @example
      * class Page extends AbstractPage {
      *   constructor() {
      *     super();
-     *     this.defineComponent("YourComponent", new CustomComponent());
-     *     this.defineComponent(new CustomComponent());
+     *     this.defineComponent({
+     *         alias: "YourComponent",
+     *         component: new CustomComponent()});
+     *     this.defineComponent({
+     *         component: new CustomComponent()
+     *     });
      *   }
      * }
      */
-    defineComponent(aliasOrComponent, component) {
-        if (aliasOrComponent.alias) {
-            this.elements.set(aliasOrComponent.alias, aliasOrComponent);
+    defineComponent(component) {
+        if (component.alias) {
+            this.elements.set(component.alias, component.component);
         } else {
-            this.elements.set(aliasOrComponent, component);
+            this.elements.set(component.component.alias, component.component);
         }
     }
 
@@ -80,12 +92,12 @@ class AbstractPage {
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
             this._getProtractorElement(null, this, firstToken),
-            this._newComponentCreator(this, firstToken)
+            this._getComponent(this, firstToken)
         );
         const {protractorElement} = tokens.reduce((current, token) => {
             return new ComponentNode(
                 this._getProtractorElement(current.protractorElement, current.component, token),
-                this._newComponentCreator(current.component, token)
+                this._getComponent(current.component, token)
             )
         }, startNode);
 
@@ -95,7 +107,7 @@ class AbstractPage {
     /**
      * Get protractor single element or collection of elements or element from collection
      * @param {ElementFinder|ElementArrayFinder} currentProtractorElement - current element
-     * @param {Component} currentComponent - current component
+     * @param {AbstractPage|Component} currentComponent - current component
      * @param {string} token - token to get new element
      * @return {ElementFinder|ElementArrayFinder} - return new element
      * @private
@@ -119,7 +131,7 @@ class AbstractPage {
      */
     _getElementOfCollection(currentProtractorElement, currentComponent, parsedToken) {
         const ROOT_ELEMENT_SELECTOR = by.css("html");
-        const newComponent = this._newComponentCreator(currentComponent, parsedToken.alias);
+        const newComponent = this._getComponent(currentComponent, parsedToken.alias);
         const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
         if (newComponent.isCollection) {
             const elementsCollection = rootElement.all(this._getSelector(newComponent));
@@ -142,18 +154,19 @@ class AbstractPage {
 
     /**
      * Get protractor element or collection
-     * @param {ElementFinder|ElementArrayFinder} currentProtractorElement - cuurent element
+     * @param {ElementFinder|ElementArrayFinder} currentProtractorElement - current element
      * @param {Component} currentComponent - current component
      * @param {ParsedToken} parsedToken - alias
      * @return {ElementFinder|ElementArrayFinder} - new protractor element
      * @private
      */
     _getElementOrCollection(currentProtractorElement, currentComponent, parsedToken) {
-        const newComponent = this._newComponentCreator(currentComponent, parsedToken.alias);
-        const rootElement = currentProtractorElement ? currentProtractorElement : element(by.css("html"));
+        const ROOT_ELEMENT_SELECTOR = by.css("html");
+        const newComponent = this._getComponent(currentComponent, parsedToken.alias);
+        const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
 
         if (newComponent.isCollection || rootElement.count) {
-            return rootElement.all(this._getSelector(newComponent))
+            return rootElement.all(this._getSelector(newCompon.ent))
         } else {
             return rootElement.element(this._getSelector(newComponent))
         }
@@ -161,13 +174,13 @@ class AbstractPage {
 
     /**
      * Function for verifying and returning element
-     * @param {Component} currentComponent - current component
+     * @param {AbstractPage|Component} currentComponent - current component
      * @param {string} token - token to create new compoenent
      * @returns {Component} - new component
      * @throws {Error}
      * @private
      */
-    _newComponentCreator(currentComponent, token) {
+    _getComponent(currentComponent, token) {
         const parsedToken = new ParsedToken(token);
         if (currentComponent.elements.has(parsedToken.alias)) {
             return currentComponent.elements.get(parsedToken.alias)
@@ -260,10 +273,10 @@ class ParsedToken {
         const ELEMENT_OF_COLLECTION_REGEXP = /#([!\$]?.+)\s+(in|of)\s+(.+)/;
         if (ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
             const parsedTokens = token.match(ELEMENT_OF_COLLECTION_REGEXP);
-            const rememberedValue = Memory.parseValue(parsedTokens[1]);
+            const value = parsedTokens[1];
 
-            this.index = parsedTokens[2] === "of" ? Number.parseInt(rememberedValue) : undefined;
-            this.innerText = parsedTokens[2] === "in" ? rememberedValue : undefined;
+            this.index = parsedTokens[2] === "of" ? Number.parseInt(value) : undefined;
+            this.innerText = parsedTokens[2] === "in" ? value : undefined;
             this.alias = parsedTokens[3];
         } else {
             this.alias = token;

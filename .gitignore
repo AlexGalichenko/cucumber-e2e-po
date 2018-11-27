@@ -11,6 +11,5 @@ dev.debug.log
 *.cmd
 .npmrc
 .bmbrefs
-test
 creds
 out/
