@@ -29,7 +29,7 @@ class Component extends AbstractPage {
         this.selector = component.selector;
         this.selectorType = component.selectorType || "css";
         this.text = component.text ? component.text : "";
-        this.isCollection = !!component.isCollection;
+        this.isCollection = Boolean(component.isCollection);
     }
 
 }
