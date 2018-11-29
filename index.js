@@ -1,6 +1,6 @@
-exports.State = require('./src/State');
-exports.Collection = require('./src/Collection');
-exports.Component = require('./src/Component');
-exports.Element = require('./src/Element');
-exports.AbstractPage = require('./src/AbstractPage');
-exports.AbstractPageMap = require('./src/AbstractPageMap');
+exports.State = require('./src/state/State');
+exports.Collection = require('./src/po/Collection');
+exports.Component = require('./src/po/Component');
+exports.Element = require('./src/po/Element');
+exports.AbstractPage = require('./src/po/AbstractPage');
+exports.AbstractPageMap = require('./src/page_map/AbstractPageMap');
