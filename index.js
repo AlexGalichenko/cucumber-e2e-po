@@ -1,5 +1,6 @@
-exports.State = require('./framework/state/State');
-exports.Collection = require('./framework/pop/Collection');
-exports.Component = require('./framework/pop/Component');
-exports.Element = require('./framework/pop/Element');
-exports.AbstractPage = require('./framework/pop/AbstractPage');
+exports.State = require('./src/State');
+exports.Collection = require('./src/Collection');
+exports.Component = require('./src/Component');
+exports.Element = require('./src/Element');
+exports.AbstractPage = require('./src/AbstractPage');
+exports.AbstractPageMap = require('./src/AbstractPageMap');
