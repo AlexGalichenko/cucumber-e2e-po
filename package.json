@@ -1,5 +1,5 @@
 {
-  "name": "protractor-cucumber-boilerplate-po",
+  "name": "@cucumber-e2e/po",
   "version": "0.0.1",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
@@ -12,7 +12,10 @@
     "protractor",
     "automation",
     "BDD",
-    "KDT"
+    "KDT",
+    "page object",
+    "po",
+    "pop"
   ],
   "author": "Alexander Galichenko",
   "license": "MIT",

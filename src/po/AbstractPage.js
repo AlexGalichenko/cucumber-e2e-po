@@ -14,7 +14,7 @@ class AbstractPage {
     /**
      * Define element on page
      * @param {string} element.alias - alias
-     * @param {string} element.selector - selector
+     * @param {string|Function} element.selector - selector
      * @param {string} [element.selectorType] - selector type (css, cssContainingText, xpath) (default css)
      * @param {string} [element.text] - text (for cssContainingText selector type)
      * @example
@@ -200,6 +200,7 @@ class AbstractPage {
         switch (element.selectorType) {
             case "css": return by.css(element.selector);
             case "xpath": return by.xpath(element.selector);
+            case "js": return by.js(element.selector);
             case "cssContainingText": {
                 if (element.text) {
                     return by.cssContainingText(element.selector, element.text)
