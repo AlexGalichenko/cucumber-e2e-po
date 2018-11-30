@@ -6,7 +6,7 @@ class State {
 
     /**
      * Set page map
-     * @param {AbstractPageMap} pageMap - page map
+     * @param {PageMap} pageMap - page map
      * @example State.setPageMap(new PageMap());
      */
     static setPageMap(pageMap) {
