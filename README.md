@@ -1,6 +1,6 @@
 # Page Objects
 Page map is the collection of defined pages which will be used in State object to easy switch beetween pages.
-##Page Map
+## Page Map
 ```javascript
 const PageMap = require("@cucumber-e2e").PageMap;
 const LoginPage = require("./LoginPage");
