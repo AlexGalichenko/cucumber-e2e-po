@@ -2,10 +2,14 @@ const Element = require("./Element");
 const Collection = require("./Collection");
 
 /**
+ * @global $ - shortcut for element
+ */
+
+/**
  * @abstract
  * @type {AbstractPage}
  */
-class AbstractPage {
+class WebdriverIOAbstractPage {
 
     constructor() {
         this.elements = new Map();
@@ -84,68 +88,68 @@ class AbstractPage {
     /**
      * Get element by key
      * @param {string} key - key
-     * @return {ElementFinder|ElementArrayFinder} - protractor element
+     * @return {*} - webdriverIO element
      */
     getElement(key) {
         const TOKEN_SPLIT_REGEXP = /\s*>\s*/;
         const tokens = key.split(TOKEN_SPLIT_REGEXP);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
-            this._getProtractorElement(null, this, firstToken),
+            this._getWebdriverIOElement(null, this, firstToken),
             this._getComponent(this, firstToken)
         );
-        const protractorElement = tokens.reduce((current, token) => {
+        const webdriverIOElement = tokens.reduce((current, token) => {
             return new ComponentNode(
-                this._getProtractorElement(current.element, current.component, token),
+                this._getWebdriverIOElement(current.element, current.component, token),
                 this._getComponent(current.component, token)
             )
         }, startNode);
 
-        return protractorElement.element;
+        return webdriverIOElement.element;
     }
 
     /**
-     * Get protractor single element or collection of elements or element from collection
-     * @param {ElementFinder|ElementArrayFinder} currentProtractorElement - current element
-     * @param {AbstractPage|Component} currentComponent - current component
+     * Get webdriverIO single element or collection of elements or element from collection
+     * @param {*} currentElement - current element
+     * @param {WebdriverIOAbstractPage|Component} currentComponent - current component
      * @param {string} token - token to get new element
-     * @return {ElementFinder|ElementArrayFinder} - return new element
+     * @return {*} - return new element
      * @private
      */
-    _getProtractorElement(currentProtractorElement, currentComponent, token) {
+    _getWebdriverIOElement(currentElement, currentComponent, token) {
         const parsedToken = new ParsedToken(token);
         if (parsedToken.isElementOfCollection()) {
-            return this._getElementOfCollection(currentProtractorElement, currentComponent, parsedToken)
+            return this._getElementOfCollection(currentElement, currentComponent, parsedToken)
         } else {
-            return this._getElementOrCollection(currentProtractorElement, currentComponent, parsedToken)
+            return this._getElementOrCollection(currentElement, currentComponent, parsedToken)
         }
     }
 
     /**
-     * Get protractor element by index or text
-     * @param {ElementFinder|ElementArrayFinder} currentProtractorElement - current element
+     * Get webdriverIO element by index or text
+     * @param {*} currentElement - current element
      * @param {Component} currentComponent - current component
      * @param {ParsedToken} parsedToken - parsed token
-     * @return {ElementFinder|ElementArrayFinder} - new protractor element
+     * @return {*} - new webdriverIO element
      * @private
      */
-    _getElementOfCollection(currentProtractorElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = by.css("html");
+    _getElementOfCollection(currentElement, currentComponent, parsedToken) {
+        const ROOT_ELEMENT_SELECTOR = "html";
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
+        const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
         if (newComponent.isCollection) {
-            const elementsCollection = rootElement.all(this._getSelector(newComponent));
+            const elementsCollection = rootElement.$$(this._getSelector(newComponent));
             if (parsedToken.hasTokenIn()) {
-                const locator = elementsCollection.locator();
-                if (this._isLocatorTranformable(locator)) {
-                    return rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText)).first()
-                } else {
-                    return elementsCollection
-                        .filter(elem => elem.getText().then(text => text.includes(parsedToken.innerText)))
-                        .first();
-                }
+                return elementsCollection.then(
+                    collection => {
+                        const promises = collection
+                            .map(element => browser.elementIdText(element.value.ELEMENT)
+                                .then(text => text.value.includes(parsedToken.innerText)));
+                        return Promise.all(promises).then(texts => collection[texts.findIndex(isRightText => isRightText)])
+                    }
+                )
             } else if (parsedToken.hasTokenOf()) {
-                return elementsCollection.get(parsedToken.index - 1)
+                return elementsCollection.then(collection => collection[parsedToken.index - 1])
             }
         } else {
             throw new Error(`${parsedToken.alias} is not collection`)
@@ -153,22 +157,21 @@ class AbstractPage {
     }
 
     /**
-     * Get protractor element or collection
-     * @param {ElementFinder|ElementArrayFinder} currentProtractorElement - current element
+     * Get webdriverIO element or collection
+     * @param {*} currentElement - current element
      * @param {Component} currentComponent - current component
      * @param {ParsedToken} parsedToken - alias
-     * @return {ElementFinder|ElementArrayFinder} - new protractor element
+     * @return {*} - new webdriverIO element
      * @private
      */
-    _getElementOrCollection(currentProtractorElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = by.css("html");
+    _getElementOrCollection(currentElement, currentComponent, parsedToken) {
+        const ROOT_ELEMENT_SELECTOR = "html";
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
-
-        if (newComponent.isCollection || rootElement.count) {
-            return rootElement.all(this._getSelector(newComponent))
+        const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
+        if (newComponent.isCollection || rootElement.length) {
+            return rootElement.$$(this._getSelector(newComponent))
         } else {
-            return rootElement.element(this._getSelector(newComponent))
+            return rootElement.$(this._getSelector(newComponent))
         }
     }
 
@@ -192,49 +195,15 @@ class AbstractPage {
     /**
      * Resolve element by location strategy
      * @param {Element|Collection|Component} element - element to get selector
-     * @return {WebDriverLocator|ProtractorLocator} - by selector
+     * @return {*} - by selector
      * @throws {Error}
      * @private
      */
     _getSelector(element) {
         switch (element.selectorType) {
-            case "css": return by.css(element.selector);
-            case "xpath": return by.xpath(element.selector);
-            case "js": return by.js(element.selector);
-            case "cssContainingText": {
-                if (element.text) {
-                    return by.cssContainingText(element.selector, element.text)
-                } else {
-                    throw new Error("Text is not defined")
-                }
-            } break;
+            case "css": return element.selector;
+            case "xpath": return element.selector;
             default: throw new Error(`Selector type ${element.selectorType} is not defined`);
-        }
-    }
-
-    /**
-     * Verify if locator hack can be applied
-     * @param locator - locator of element
-     * @return {boolean}
-     * @private
-     */
-    _isLocatorTranformable(locator) {
-        switch (locator.using) {
-            case "css selector": return true; break;
-            default: return false
-        }
-    }
-
-    /**
-     * Transform locator for text selection
-     * @param locator - locator
-     * @param text - text
-     * @return {ProtractorLocator}
-     * @private
-     */
-    _transformLocatorByText(locator, text) {
-        switch (locator.using) {
-            case "css selector": return by.cssContainingText(locator.value, text); break;
         }
     }
 
@@ -249,7 +218,7 @@ class ComponentNode {
 
     /**
      * Constructor of Component Node
-     * @param {ElementFinder|ElementArrayFinder} element
+     * @param {*} element
      * @param {AbstractPage|Component} component
      */
     constructor(element, component) {
@@ -313,4 +282,4 @@ class ParsedToken {
 
 }
 
-module.exports = AbstractPage;
+module.exports = WebdriverIOAbstractPage;
