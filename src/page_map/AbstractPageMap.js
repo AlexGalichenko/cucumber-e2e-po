@@ -1,11 +1,9 @@
-const State = require("../state/State");
-
 /**
  * Class representing Page Map
  * @abstract
- * @type {AbstractPageMap}
+ * @type {PageMap}
  */
-class AbstractPageMap {
+class PageMap {
 
     constructor() {
         this.pages = new Map();
@@ -41,11 +39,6 @@ class AbstractPageMap {
             throw new Error(`${alias} page is not defined`)
         }
     }
-
-    init() {
-        State.setPageMap(this);
-    }
-
 }
 
 /**
@@ -68,4 +61,4 @@ class PageDefinition {
 
 }
 
-module.exports = AbstractPageMap;
+module.exports = PageMap;

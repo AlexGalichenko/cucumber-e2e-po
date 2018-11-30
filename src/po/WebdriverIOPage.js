@@ -1,95 +1,22 @@
-const Element = require("./Element");
-const Collection = require("./Collection");
-
-/**
- * @global $ - shortcut for element
- */
+const AbstractPage = require("./AbstractPage");
+const ComponentNode = require("./ComponentNode");
+const ParsedToken = require("./ParsedToken");
 
 /**
  * @abstract
  * @type {AbstractPage}
  */
-class WebdriverIOAbstractPage {
+class WebdriverIOAbstractPage extends AbstractPage {
 
     constructor() {
-        this.elements = new Map();
+        super();
     }
 
     /**
-     * Define element on page
-     * @param {string} element.alias - alias
-     * @param {string|Function} element.selector - selector
-     * @param {string} [element.selectorType] - selector type (css, cssContainingText, xpath) (default css)
-     * @param {string} [element.text] - text (for cssContainingText selector type)
-     * @example
-     * class Page extends AbstractPage {
-     *   constructor() {
-     *     super();
-     *     this.defineElement({
-     *         alias: "YourElement",
-     *         selector: "div > div",
-     *         selectorType: "cssContainingText",
-     *         text: "some text"});
-     *     }
-     * }
-     */
-    defineElement(element) {
-        this.elements.set(element.alias, new Element(element));
-    }
-
-    /**
-     * Define collection on page
-     * @param {string} collection.alias - alias
-     * @param {string} collection.selector - selector
-     * @param {string} [collection.selectorType] - selector type (css, cssContainingText, xpath) (default css)
-     * @param {string} [collection.text] - text (for cssContainingText selector type)
-     * @example
-     * class Page extends AbstractPage {
-     *   constructor() {
-     *     super();
-     *     this.defineCollection({
-     *         alias: "YourCollection",
-     *         selector: "div > div",
-     *         selectorType: "cssContainingText",
-     *         text: "some text"});
-     *     }
-     *   }
-     * }
-     */
-    defineCollection(collection) {
-        this.elements.set(collection.alias, new Collection(collection));
-    }
-
-    /**
-     * Define component on page
-     * @param {string} [component.alias] - alias or component
-     * @param {Component} component.component - component
-     * @example
-     * class Page extends AbstractPage {
-     *   constructor() {
-     *     super();
-     *     this.defineComponent({
-     *         alias: "YourComponent",
-     *         component: new CustomComponent()});
-     *     this.defineComponent({
-     *         component: new CustomComponent()
-     *     });
-     *   }
-     * }
-     */
-    defineComponent(component) {
-        if (component.alias) {
-            this.elements.set(component.alias, component.component);
-        } else {
-            this.elements.set(component.component.alias, component.component);
-        }
-    }
-
-    /**
-     * Get element by key
-     * @param {string} key - key
-     * @return {*} - webdriverIO element
-     */
+    * Get element by key
+    * @param {string} key - key
+    * @return {*} - webdriverIO element
+    */
     getElement(key) {
         const TOKEN_SPLIT_REGEXP = /\s*>\s*/;
         const tokens = key.split(TOKEN_SPLIT_REGEXP);
@@ -205,79 +132,6 @@ class WebdriverIOAbstractPage {
             case "xpath": return element.selector;
             default: throw new Error(`Selector type ${element.selectorType} is not defined`);
         }
-    }
-
-}
-
-/**
- * Component tree node
- * @type {ComponentNode}
- * @private
- */
-class ComponentNode {
-
-    /**
-     * Constructor of Component Node
-     * @param {*} element
-     * @param {AbstractPage|Component} component
-     */
-    constructor(element, component) {
-        this.element = element;
-        this.component = component;
-    }
-
-}
-
-/**
- * Class representing set of element of token
- * @type {ParsedToken}
- * @private
- */
-class ParsedToken {
-
-    /**
-     * Define token
-     * @param {string} token
-     */
-    constructor(token) {
-        const ELEMENT_OF_COLLECTION_REGEXP = /#([!\$]?.+)\s+(in|of)\s+(.+)/;
-        if (ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
-            const parsedTokens = token.match(ELEMENT_OF_COLLECTION_REGEXP);
-            const value = parsedTokens[1];
-
-            this.index = parsedTokens[2] === "of" ? Number.parseInt(value) : undefined;
-            this.innerText = parsedTokens[2] === "in" ? value : undefined;
-            this.alias = parsedTokens[3];
-        } else {
-            this.alias = token;
-        }
-    }
-
-    /**
-     * Check if token is element of collection
-     * @return {boolean}
-     * @public
-     */
-    isElementOfCollection() {
-        return this.index !== undefined || this.innerText !== undefined
-    }
-
-    /**
-     * Check if token is of
-     * @return {boolean}
-     * @public
-     */
-    hasTokenOf() {
-        return this.index !== undefined
-    }
-
-    /**
-     * Check if token is in
-     * @return {boolean}
-     * @public
-     */
-    hasTokenIn(){
-        return this.innerText !== undefined
     }
 
 }
