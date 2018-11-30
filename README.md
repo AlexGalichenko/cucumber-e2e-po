@@ -18,7 +18,7 @@ class CustomPageMap extends PageMap {
     }
 }
 ```
-###Methods
+### Methods
 * definePage
 
 | param | mandatory | description |
@@ -27,7 +27,7 @@ class CustomPageMap extends PageMap {
 | regexp | M | regexp of URL to determine page |
 | clazz | M | page class |
 
-##Page
+## Page
 PO model supports both Protractor and WebdriverIO.
 ```javascript
 /**
@@ -58,9 +58,7 @@ class CustomPage extends Page {
     }
 }
 ```
-###Methods
-
-##Component
+## Component
 ```javascript
 class CustomComponent extends Component {
     constructor() {
