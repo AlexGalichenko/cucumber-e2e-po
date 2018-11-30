@@ -25,7 +25,7 @@ class CustomPageMap extends PageMap {
 |--------|-----------|---------------------------------|
 | alias | M | alias of the page |
 | regexp | M | regexp of URL to determine page |
-| clazz | M | page class |
+| page | M | page object |
 
 ## Page
 PO model supports both Protractor and WebdriverIO.
