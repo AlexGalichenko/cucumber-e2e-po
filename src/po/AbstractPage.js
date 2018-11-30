@@ -166,7 +166,7 @@ class AbstractPage {
         const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
 
         if (newComponent.isCollection || rootElement.count) {
-            return rootElement.all(this._getSelector(newCompon.ent))
+            return rootElement.all(this._getSelector(newComponent))
         } else {
             return rootElement.element(this._getSelector(newComponent))
         }
