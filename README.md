@@ -22,7 +22,7 @@ class CustomPageMap extends PageMap {
 * definePage
 
 | param | mandatory | description |
-|--------|-----------|---------------------------------|
+|-|-|-|
 | alias | M | alias of the page |
 | regexp | M | regexp of URL to determine page |
 | page | M | page object |
@@ -78,7 +78,8 @@ const page = State.getPage();
 const element = page.getElement("Simple Element"); //get single element or collection
 const elementOfComponent = page.getElement("Component > Element"); //get element or collection of component
 const elementOfCollection = page.getElement("#1 of Collection"); //get element of collection by index
-const elmentOfCollectionByText = page.getElement("#Text in Collection"); //get element of collection by text (only visible text supported for webdriverIO)
+//get element of collection by text (only visible text supported for webdriverIO)
+const elmentOfCollectionByText = page.getElement("#Text in Collection");
 ```
 ## Component
 ```javascript
