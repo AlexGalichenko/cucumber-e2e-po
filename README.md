@@ -72,6 +72,14 @@ class CustomPage extends ProtractorPage {
     }
 }
 ```
+To get element from page call getElement method with alias of provided element.
+```javascript
+const page = State.getPage();
+const element = page.getElement("Simple Element"); //get single element or collection
+const elementOfComponent = page.getElement("Component > Element"); //get element or collection of component
+const elementOfCollection = page.getElement("#1 of Collection"); //get element of collection by index
+const elmentOfCollectionByText = page.getElement("#Text in Collection"); //get element of collection by text (only visible text supported for webdriverIO)
+```
 ## Component
 ```javascript
 class CustomComponent extends Component {
