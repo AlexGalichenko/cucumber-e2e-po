@@ -1,6 +1,6 @@
 # Page Objects
-Page map is the collection of defined pages which will be used in State object to easy switch beetween pages.
 ## Page Map
+Page map is collection of defined pages which will be used in State object to easy switch beetween pages.
 ```javascript
 const PageMap = require("@cucumber-e2e").PageMap;
 const LoginPage = require("./LoginPage");
@@ -27,6 +27,20 @@ class CustomPageMap extends PageMap {
 | regexp | M | regexp of URL to determine page |
 | page | M | page object |
 
+To use page map call setPageMap method of State class. Prepare hooks is a good place to do that.
+```javascript
+onPrepare: () => {
+    State.setPageMap(new PageMap());
+}
+```
+Set new page.
+```javascript
+State.setPage("YourName");
+```
+Get page. Returns one which was set.
+```javascript
+const page = State.getPage();
+```
 ## Page
 PO model supports both Protractor and WebdriverIO.
 ```javascript
@@ -37,7 +51,7 @@ const ProtractorPage = require("@cucumber-e2e/po").ProtractorPage;
 const WebdriverIOPage = require("@cucumber-e2e/po").WebdriverIOPage;
 const CustomComponent = require("./CustomComponent");
 
-class CustomPage extends Page {
+class CustomPage extends ProtractorPage {
     constructor() {
         super();
         this.defineComponent({alias: "Custom Component", component: new CustomComponent()});
