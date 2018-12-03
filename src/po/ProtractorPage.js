@@ -3,8 +3,7 @@ const ComponentNode = require("./ComponentNode");
 const ParsedToken = require("./ParsedToken");
 
 /**
- * @abstract
- * @type {AbstractPage}
+ * @extends {AbstractPage}
  */
 class ProtractorPage extends AbstractPage {
 
@@ -16,6 +15,7 @@ class ProtractorPage extends AbstractPage {
      * Get element by key
      * @param {string} key - key
      * @return {ElementFinder|ElementArrayFinder} - protractor element
+     * @override
      */
     getElement(key) {
         const TOKEN_SPLIT_REGEXP = /\s*>\s*/;
