@@ -3,7 +3,6 @@ const Collection = require("./Collection");
 
 /**
  * @abstract
- * @type {AbstractPage}
  */
 class AbstractPage {
 
@@ -82,6 +81,19 @@ class AbstractPage {
             this.elements.set(component.component.alias, component.component);
         }
     }
+
+    /**
+     * Get element of page
+     * @param {string} alias - alias of element to get
+     * @abstract
+     * @example
+     * const page = State.getPage();
+     * const element = page.getElement("Component > Element");
+     */
+    getElement(alias) {
+        throw new Error("Method getElement is not implemented");
+    }
+
 }
 
 module.exports = AbstractPage;
