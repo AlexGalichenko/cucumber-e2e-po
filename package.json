@@ -1,11 +1,19 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
     "docs": "jsdoc ./src/ -r -t ./node_modules/minami",
     "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AlexGalichenko/cucumber-e2e-po.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AlexGalichenko/cucumber-e2e-po/issues",
+    "email": "alexandr.galichenko@gmail.com"
   },
   "keywords": [
     "cucumber",
