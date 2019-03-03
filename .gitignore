@@ -13,3 +13,4 @@ dev.debug.log
 .bmbrefs
 creds
 out/
+lib/

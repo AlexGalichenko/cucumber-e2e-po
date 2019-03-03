@@ -1,11 +1,13 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
     "docs": "jsdoc ./src/ -r -t ./node_modules/minami",
-    "test": "jest"
+    "test": "jest",
+    "build": "babel src -d lib",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -25,9 +27,35 @@
     "po",
     "pop"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "6"
+          }
+        }
+      ]
+    ]
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "<rootDir>/.+/"
+    ]
+  },
   "author": "Alexander Galichenko",
   "license": "MIT",
   "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
     "jest": "^23.6.0",
     "jsdoc": "^3.5.5",
     "minami": "^1.2.3"

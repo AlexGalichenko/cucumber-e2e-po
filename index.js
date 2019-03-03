@@ -1,7 +1,7 @@
-exports.State = require('./src/state/State');
-exports.Collection = require('./src/po/Collection');
-exports.Component = require('./src/po/Component');
-exports.Element = require('./src/po/Element');
-exports.ProtractorPage = require('./src/po/ProtractorPage');
-exports.WebdriverIOPage = require('./src/po/WebdriverIOPage');
-exports.PageMap = require('./src/page_map/PageMap');
+exports.State = require('./lib/state/State');
+exports.Collection = require('./lib/po/Collection');
+exports.Component = require('./lib/po/Component');
+exports.Element = require('./lib/po/Element');
+exports.ProtractorPage = require('./lib/po/ProtractorPage');
+exports.WebdriverIOPage = require('./lib/po/WebdriverIOPage');
+exports.PageMap = require('./lib/page_map/PageMap');
