@@ -166,6 +166,7 @@ class ProtractorPage extends AbstractPage {
     _isLocatorTranformable(locator) {
         switch (locator.using) {
             case "css selector": return true;
+            case "android": return true;
             default: return false
         }
     }
@@ -180,6 +181,10 @@ class ProtractorPage extends AbstractPage {
     _transformLocatorByText(locator, text) {
         switch (locator.using) {
             case "css selector": return by.cssContainingText(locator.value, text);
+            case "android": return {
+                using: "-android uiautomator",
+                value: element.selector + ".text(\"" + text + "\")"
+            };
         }
     }
 }
