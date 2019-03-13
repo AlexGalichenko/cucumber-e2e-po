@@ -61,9 +61,8 @@ class ProtractorPage extends AbstractPage {
      * @private
      */
     _getElementOfCollection(currentProtractorElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = by.css("html");
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
+        const rootElement = currentProtractorElement ? currentProtractorElement : element;
         if (newComponent.isCollection) {
             const elementsCollection = rootElement.all(this._getSelector(newComponent));
             if (parsedToken.hasTokenIn()) {
@@ -92,14 +91,17 @@ class ProtractorPage extends AbstractPage {
      * @private
      */
     _getElementOrCollection(currentProtractorElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = by.css("html");
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentProtractorElement ? currentProtractorElement : element(ROOT_ELEMENT_SELECTOR);
+        const rootElement = currentProtractorElement ? currentProtractorElement : element;
 
         if (newComponent.isCollection || rootElement.count) {
             return rootElement.all(this._getSelector(newComponent))
         } else {
-            return rootElement.element(this._getSelector(newComponent))
+            if (currentProtractorElement) {
+                return rootElement.element(this._getSelector(newComponent))
+            } else {
+                return element(this._getSelector(newComponent))
+            }
         }
     }
 
@@ -123,7 +125,7 @@ class ProtractorPage extends AbstractPage {
     /**
      * Resolve element by location strategy
      * @param {Element|Collection|Component} element - element to get selector
-     * @return {WebDriverLocator|ProtractorLocator} - by selector
+     * @return {WebDriverLocator|ProtractorLocator|Object} - by selector
      * @throws {Error}
      * @private
      */
@@ -132,6 +134,18 @@ class ProtractorPage extends AbstractPage {
             case "css": return by.css(element.selector);
             case "xpath": return by.xpath(element.selector);
             case "js": return by.js(element.selector);
+            case "android": return {
+                using: "-android uiautomator",
+                value: element.selector
+            };
+            case "ios": return {
+                using: "-ios uiautomation",
+                value: element.selector
+            };
+            case "accessibilityId": return {
+                using: "accessibility id",
+                value: element.selector
+            };
             case "cssContainingText": {
                 if (element.text) {
                     return by.cssContainingText(element.selector, element.text)
@@ -151,7 +165,7 @@ class ProtractorPage extends AbstractPage {
      */
     _isLocatorTranformable(locator) {
         switch (locator.using) {
-            case "css selector": return true; break;
+            case "css selector": return true;
             default: return false
         }
     }
@@ -165,10 +179,9 @@ class ProtractorPage extends AbstractPage {
      */
     _transformLocatorByText(locator, text) {
         switch (locator.using) {
-            case "css selector": return by.cssContainingText(locator.value, text); break;
+            case "css selector": return by.cssContainingText(locator.value, text);
         }
     }
-
 }
 
 module.exports = ProtractorPage;
