@@ -1,0 +1,16 @@
+.idea
+bmb_packages
+bower_components
+node_modules
+device-debug
+dist
+publish
+.bmb.cli.cfg.json
+npm-debug.log
+dev.debug.log
+*.cmd
+.npmrc
+.bmbrefs
+creds
+out/
+src/
