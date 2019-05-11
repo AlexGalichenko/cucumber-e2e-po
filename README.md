@@ -78,8 +78,12 @@ const page = State.getPage();
 const element = page.getElement("Simple Element"); //get single element or collection
 const elementOfComponent = page.getElement("Component > Element"); //get element or collection of component
 const elementOfCollection = page.getElement("#1 of Collection"); //get element of collection by index
+const firstElementOfCollection = page.getElement("#FIRST of Collection"); //get element of collection by index
+const lastElementOfCollection = page.getElement("#LAST of Collection"); //get element of collection by index
 //get element of collection by text (only visible text supported for webdriverIO)
 const elmentOfCollectionByText = page.getElement("#Text in Collection");
+//get element of collection by exact text (only visible text supported for webdriverIO)
+const elmentOfCollectionByExactText = page.getElement("@Text in Collection");
 ```
 ## Component
 ```javascript
