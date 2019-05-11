@@ -91,6 +91,8 @@ class WebdriverIOAbstractPage extends AbstractPage {
                         .then(text => {
                             if (parsedToken.isExactMatch()) {
                                 return text.value === parsedToken.innerText
+                            } else if (parsedToken.isRegexp()) {
+                                return parsedToken.innerText.test(text.value)
                             } else {
                                 return text.value.includes(parsedToken.innerText)
                             }
