@@ -1,4 +1,4 @@
-const AbstractPageMap = require("../lib/page_map/AbstractPageMap");
+const AbstractPageMap = require("../lib/page_map/PageMap");
 const AbstractPage = require("../lib/po/AbstractPage");
 
 const page = new AbstractPage();
