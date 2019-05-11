@@ -66,19 +66,51 @@ class ProtractorPage extends AbstractPage {
         if (newComponent.isCollection) {
             const elementsCollection = rootElement.all(this._getSelector(newComponent));
             if (parsedToken.hasTokenIn()) {
-                const locator = elementsCollection.locator();
-                if (this._isLocatorTranformable(locator)) {
-                    return rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText)).first()
-                } else {
-                    return elementsCollection
-                        .filter(elem => elem.getText().then(text => text.includes(parsedToken.innerText)))
-                        .first();
-                }
+                return this._getElementOfCollectionByText(elementsCollection, parsedToken)
             } else if (parsedToken.hasTokenOf()) {
-                return elementsCollection.get(parsedToken.index - 1)
+                return this._getElementOfCollectionByIndex(elementsCollection, parsedToken)
             }
         } else {
             throw new Error(`${parsedToken.alias} is not collection`)
+        }
+    }
+
+    /**
+     * Get element from collection by text
+     * @param elementsCollection - collection to select from
+     * @param parsedToken - token to select element
+     * @return {ElementFinder|ElementArrayFinder} - new protractor element
+     * @private
+     */
+    _getElementOfCollectionByText(elementsCollection, parsedToken) {
+        const locator = elementsCollection.locator();
+        if (parsedToken.isExactMatch()) {
+            return elementsCollection
+                .filter(elem => elem.getText().then(text => text === parsedToken.innerText))
+                .first();
+        } else {
+            if (this._isLocatorTranformable(locator)) {
+                return rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText)).first()
+            } else {
+                return elementsCollection
+                    .filter(elem => elem.getText().then(text => text.includes(parsedToken.innerText)))
+                    .first();
+            }
+        }
+    }
+
+    /**
+     * Get element from collection by index
+     * @param elementsCollection - collection to select from
+     * @param parsedToken - token to select element
+     * @return {ElementFinder|ElementArrayFinder} - new protractor element
+     * @private
+     */
+    _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
+        switch (parsedToken.index) {
+            case "FIRST": return elementsCollection.first();
+            case "LAST": return elementsCollection.last();
+            default: return elementsCollection.get(parsedToken.index - 1)
         }
     }
 

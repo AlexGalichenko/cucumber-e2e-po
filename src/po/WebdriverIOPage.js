@@ -67,19 +67,51 @@ class WebdriverIOAbstractPage extends AbstractPage {
         if (newComponent.isCollection) {
             const elementsCollection = rootElement.$$(this._getSelector(newComponent));
             if (parsedToken.hasTokenIn()) {
-                return elementsCollection.then(
-                    collection => {
-                        const promises = collection
-                            .map(element => browser.elementIdText(element.value.ELEMENT)
-                                .then(text => text.value.includes(parsedToken.innerText)));
-                        return Promise.all(promises).then(texts => collection[texts.findIndex(isRightText => isRightText)])
-                    }
-                )
+                return this._getElementOfCollectionByText(elementsCollection, parsedToken)
             } else if (parsedToken.hasTokenOf()) {
-                return elementsCollection.then(collection => collection[parsedToken.index - 1])
+                return this._getElementOfCollectionByIndex(elementsCollection, parsedToken)
             }
         } else {
             throw new Error(`${parsedToken.alias} is not collection`)
+        }
+    }
+
+    /**
+     * Get element from collection by text
+     * @param elementsCollection - collection to select from
+     * @param parsedToken - token to select element
+     * @return {ElementFinder|ElementArrayFinder} - new protractor element
+     * @private
+     */
+    _getElementOfCollectionByText(elementsCollection, parsedToken) {
+        return elementsCollection.then(
+            collection => {
+                const promises = collection
+                    .map(element => browser.elementIdText(element.value.ELEMENT)
+                        .then(text => {
+                            if (parsedToken.isExactMatch()) {
+                                return text.value === parsedToken.innerText
+                            } else {
+                                return text.value.includes(parsedToken.innerText)
+                            }
+                        }));
+                return Promise.all(promises).then(texts => collection[texts.findIndex(isRightText => isRightText)])
+            }
+        )
+    }
+
+    /**
+     * Get element from collection by index
+     * @param elementsCollection - collection to select from
+     * @param parsedToken - token to select element
+     * @return {ElementFinder|ElementArrayFinder} - new protractor element
+     * @private
+     */
+    _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
+        switch (parsedToken.index) {
+            case "FIRST": return elementsCollection.then(collection => collection[0]);
+            case "LAST": return elementsCollection.then(collection => collection[collection.length - 1]);
+            default: return elementsCollection.then(collection => collection[parsedToken.index - 1])
         }
     }
 
