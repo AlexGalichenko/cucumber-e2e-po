@@ -10,7 +10,7 @@ class ParsedToken {
      * @param {string} token
      */
     constructor(token) {
-        const ELEMENT_OF_COLLECTION_REGEXP = /([#@])([!\$]?.+)\s+(in|of)\s+(.+)/;
+        const ELEMENT_OF_COLLECTION_REGEXP = /([#@/])([!\$]?.+)\s+(in|of)\s+(.+)/;
         if (ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
             const parsedTokens = token.match(ELEMENT_OF_COLLECTION_REGEXP);
             const value = parsedTokens[2];
@@ -21,7 +21,11 @@ class ParsedToken {
                     ? Number.parseInt(value)
                     : value
                 : undefined;
-            this.innerText = parsedTokens[3] === "in" ? value : undefined;
+            this.innerText = parsedTokens[3] === "in"
+                ? this.modifier !== "/"
+                    ? value
+                    : new RegExp(value.replace(/\/$/, ""), "gmi")
+                : undefined;
             this.alias = parsedTokens[4];
         } else {
             this.alias = token;
@@ -57,6 +61,10 @@ class ParsedToken {
 
     isExactMatch() {
         return this.modifier === "@"
+    }
+
+    isRegexp() {
+        return this.modifier === "/"
     }
 
 }

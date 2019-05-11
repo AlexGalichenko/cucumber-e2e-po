@@ -66,7 +66,7 @@ class ProtractorPage extends AbstractPage {
         if (newComponent.isCollection) {
             const elementsCollection = rootElement.all(this._getSelector(newComponent));
             if (parsedToken.hasTokenIn()) {
-                return this._getElementOfCollectionByText(elementsCollection, parsedToken)
+                return this._getElementOfCollectionByText(elementsCollection, parsedToken, rootElement)
             } else if (parsedToken.hasTokenOf()) {
                 return this._getElementOfCollectionByIndex(elementsCollection, parsedToken)
             }
@@ -82,11 +82,15 @@ class ProtractorPage extends AbstractPage {
      * @return {ElementFinder|ElementArrayFinder} - new protractor element
      * @private
      */
-    _getElementOfCollectionByText(elementsCollection, parsedToken) {
+    _getElementOfCollectionByText(elementsCollection, parsedToken, rootElement) {
         const locator = elementsCollection.locator();
         if (parsedToken.isExactMatch()) {
             return elementsCollection
                 .filter(elem => elem.getText().then(text => text === parsedToken.innerText))
+                .first();
+        } else if (parsedToken.isRegexp()) {
+            return elementsCollection
+                .filter(elem => elem.getText().then(text => parsedToken.innerText.test(text)))
                 .first();
         } else {
             if (this._isLocatorTranformable(locator)) {
