@@ -64,16 +64,18 @@ class WebdriverIOAbstractPage extends AbstractPage {
         const ROOT_ELEMENT_SELECTOR = "html";
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
         const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
-        if (newComponent.isCollection) {
-            const elementsCollection = rootElement.$$(this._getSelector(newComponent));
-            if (parsedToken.hasTokenIn()) {
-                return this._getElementOfCollectionByText(elementsCollection, parsedToken)
-            } else if (parsedToken.hasTokenOf()) {
-                return this._getElementOfCollectionByIndex(elementsCollection, parsedToken)
+        return rootElement.then(element => {
+            if (newComponent.isCollection) {
+                const elementsCollection = element.$$(this._getSelector(newComponent));
+                if (parsedToken.hasTokenIn()) {
+                    return this._getElementOfCollectionByText(elementsCollection, parsedToken)
+                } else if (parsedToken.hasTokenOf()) {
+                    return this._getElementOfCollectionByIndex(elementsCollection, parsedToken)
+                }
+            } else {
+                throw new Error(`${parsedToken.alias} is not collection`)
             }
-        } else {
-            throw new Error(`${parsedToken.alias} is not collection`)
-        }
+        });
     }
 
     /**
@@ -87,14 +89,14 @@ class WebdriverIOAbstractPage extends AbstractPage {
         return elementsCollection.then(
             collection => {
                 const promises = collection
-                    .map(element => browser.elementIdText(element.value.ELEMENT)
+                    .map(element => browser.getElementText(element.ELEMENT)
                         .then(text => {
                             if (parsedToken.isExactMatch()) {
-                                return text.value === parsedToken.innerText
+                                return text === parsedToken.innerText
                             } else if (parsedToken.isRegexp()) {
-                                return parsedToken.innerText.test(text.value)
+                                return parsedToken.innerText.test(text)
                             } else {
-                                return text.value.includes(parsedToken.innerText)
+                                return text.includes(parsedToken.innerText)
                             }
                         }));
                 return Promise.all(promises).then(texts => collection[texts.findIndex(isRightText => isRightText)])
@@ -129,10 +131,16 @@ class WebdriverIOAbstractPage extends AbstractPage {
         const ROOT_ELEMENT_SELECTOR = "html";
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
         const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
-        if (newComponent.isCollection || rootElement.length) {
-            return rootElement.$$(this._getSelector(newComponent))
+        if (newComponent.isCollection) {
+            return rootElement.then(element => element.$$(this._getSelector(newComponent)));
         } else {
-            return rootElement.$(this._getSelector(newComponent))
+            return rootElement.then(element => {
+                if (element.length) {
+                    return Promise.all(element.map(item => item.$(this._getSelector(newComponent))))
+                } else {
+                    return element.$(this._getSelector(newComponent))
+                }
+            });
         }
     }
 

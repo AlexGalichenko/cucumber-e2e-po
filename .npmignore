@@ -14,3 +14,4 @@ dev.debug.log
 creds
 out/
 src/
+test/
