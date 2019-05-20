@@ -114,4 +114,13 @@ describe("protractor tests", () => {
     it("get collection by collection extending", async function () {
         expect(await testPage.getElement("component2 > child component > child element").count()).toBe(3);
     });
+
+    it("verify did you mean feature", function () {
+        function errorHandler() {
+            const element = testPage.getElement("component2 > children component > child element")
+        }
+        expect(errorHandler).toThrowError(
+            "There is no such element: 'children component'\nDid you mean:\nchild component"
+        );
+    });
 });
