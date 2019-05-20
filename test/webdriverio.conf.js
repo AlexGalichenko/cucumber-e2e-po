@@ -19,6 +19,4 @@ exports.config = {
     },
     sync: false,
     logLevel: "silent",
-    before: function (specs) {
-    },
 };

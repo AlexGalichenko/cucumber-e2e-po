@@ -1,6 +1,7 @@
 const AbstractPage = require("./AbstractPage");
 const ComponentNode = require("./ComponentNode");
 const ParsedToken = require("./ParsedToken");
+const NoSuchElementException = require("./exception/NoSuchElementException");
 
 /**
  * @extends {AbstractPage}
@@ -154,7 +155,7 @@ class ProtractorPage extends AbstractPage {
         if (currentComponent.elements.has(parsedToken.alias)) {
             return currentComponent.elements.get(parsedToken.alias)
         } else {
-            throw new Error(`There is no such element: '${parsedToken.alias}'`)
+            throw new NoSuchElementException(parsedToken.alias, currentComponent);
         }
     }
 

@@ -115,4 +115,12 @@ describe("webdriverIO tests", () => {
         expect((await testPage.getElement("component2 > child component > child element")).length).toBe(3);
     });
 
+    // it("verify did you mean feature", async function () {
+    //     try {
+    //         await testPage.getElement("component2 > children component > child element")
+    //     } catch (e) {
+    //         expect(e.message).toEqual("There is no such element: 'children component'\nDid you mean:\nchild component");
+    //     }
+    // });
+
 });
