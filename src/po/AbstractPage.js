@@ -1,6 +1,6 @@
 const Element = require("./Element");
 const Collection = require("./Collection");
-
+const regexp = require("./helpers/regexp");
 /**
  * @abstract
  */
@@ -80,6 +80,15 @@ class AbstractPage {
         } else {
             this.elements.set(component.component.alias, component.component);
         }
+    }
+
+    /**
+     * Get tokens array from alias
+     * @param alias
+     * @protected
+     */
+    _getTokens(alias) {
+        return alias.split(regexp.TOKEN_SPLIT_REGEXP);
     }
 
 }

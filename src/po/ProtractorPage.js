@@ -2,6 +2,7 @@ const AbstractPage = require("./AbstractPage");
 const ComponentNode = require("./ComponentNode");
 const ParsedToken = require("./ParsedToken");
 const NoSuchElementException = require("./exception/NoSuchElementException");
+const regexp = require("./helpers/regexp");
 
 /**
  * @global element from protractor
@@ -20,8 +21,7 @@ class ProtractorPage extends AbstractPage {
      * @override
      */
     getElement(key) {
-        const TOKEN_SPLIT_REGEXP = /\s>\s/;
-        const tokens = key.split(TOKEN_SPLIT_REGEXP);
+        const tokens = this._getTokens(key);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
             this._getProtractorElement(null, this, firstToken),
@@ -86,16 +86,8 @@ class ProtractorPage extends AbstractPage {
      * @private
      */
     _getElementOfCollectionByText(elementsCollection, parsedToken, rootElement) {
-        const locator = elementsCollection.locator();
-        if (parsedToken.isExactMatch()) {
-            return elementsCollection
-                .filter(elem => elem.getText().then(text => text === parsedToken.innerText))
-                .first();
-        } else if (parsedToken.isRegexp()) {
-            return elementsCollection
-                .filter(elem => elem.getText().then(text => parsedToken.innerText.test(text)))
-                .first();
-        } else {
+        if (parsedToken.isPartialMatch()) {
+            const locator = elementsCollection.locator();
             if (this._isLocatorTranformable(locator)) {
                 return rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText)).first()
             } else {
@@ -103,6 +95,16 @@ class ProtractorPage extends AbstractPage {
                     .filter(elem => elem.getText().then(text => text.includes(parsedToken.innerText)))
                     .first();
             }
+        }
+        if (parsedToken.isExactMatch()) {
+            return elementsCollection
+                .filter(elem => elem.getText().then(text => text === parsedToken.innerText))
+                .first();
+        }
+        if (parsedToken.isRegexp()) {
+            return elementsCollection
+                .filter(elem => elem.getText().then(text => parsedToken.innerText.test(text)))
+                .first();
         }
     }
 
@@ -114,15 +116,14 @@ class ProtractorPage extends AbstractPage {
      * @private
      */
     _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
-        const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
-        const PARTIAL_MORE_LESS_REGEXP = /^[><]\d+$/;
+        if (typeof parsedToken.index === "number") return elementsCollection.get(parsedToken.index - 1);
         if (parsedToken.index === "FIRST") return elementsCollection.first();
         if (parsedToken.index === "LAST") return elementsCollection.last();
-        if (PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
+        if (regexp.PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
             const [startIndex, endIndex] = parsedToken.index.split("-").map(index => +index);
             return elementsCollection.filter((_, i) => i >= startIndex && i <= endIndex);
         }
-        if (PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
+        if (regexp.PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
             const [operator, index] = [parsedToken.index[0], +parsedToken.index.slice(1)];
             switch (operator) {
                 case ">": return elementsCollection.filter((_, i) => i > index - 1);
@@ -130,7 +131,6 @@ class ProtractorPage extends AbstractPage {
                 default: throw new Error(`Operator ${operator} is not defined`)
             }
         }
-        return elementsCollection.get(parsedToken.index - 1);
     }
 
     /**

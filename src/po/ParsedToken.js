@@ -1,3 +1,5 @@
+const regexp = require("./helpers/regexp");
+
 /**
  * Class representing set of element of token
  * @type {ParsedToken}
@@ -10,12 +12,8 @@ class ParsedToken {
      * @param {string} token
      */
     constructor(token) {
-        const ELEMENT_OF_COLLECTION_REGEXP = /([#@/])([!\$]?.+)\s+(in|of)\s+(.+)/;
-        const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
-        const PARTIAL_MORE_LESS_REGEXP = /^[><]\d+$/;
-
-        if (ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
-            const parsedTokens = token.match(ELEMENT_OF_COLLECTION_REGEXP);
+        if (regexp.ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
+            const parsedTokens = token.match(regexp.ELEMENT_OF_COLLECTION_REGEXP);
             const value = parsedTokens[2];
 
             this.modifier = parsedTokens[1];
@@ -23,8 +21,8 @@ class ParsedToken {
                 ? (
                     value !== "FIRST" &&
                     value !== "LAST" &&
-                    !PARTIAL_ARRAY_REGEXP.test(value) &&
-                    !PARTIAL_MORE_LESS_REGEXP.test(value)
+                    !regexp.PARTIAL_ARRAY_REGEXP.test(value) &&
+                    !regexp.PARTIAL_MORE_LESS_REGEXP.test(value)
                 )
                     ? Number.parseInt(value)
                     : value : undefined;
@@ -68,6 +66,10 @@ class ParsedToken {
 
     isExactMatch() {
         return this.modifier === "@"
+    }
+
+    isPartialMatch() {
+        return this.modifier === "#"
     }
 
     isRegexp() {

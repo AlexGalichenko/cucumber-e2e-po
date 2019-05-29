@@ -2,6 +2,7 @@ const AbstractPage = require("./AbstractPage");
 const ComponentNode = require("./ComponentNode");
 const ParsedToken = require("./ParsedToken");
 const NoSuchElementException = require("./exception/NoSuchElementException");
+const regexp = require("./helpers/regexp");
 
 /**
  * @extends {AbstractPage}
@@ -19,8 +20,7 @@ class WebdriverIOAbstractPage extends AbstractPage {
      * @override
      */
     getElement(key) {
-        const TOKEN_SPLIT_REGEXP = /\s>\s/;
-        const tokens = key.split(TOKEN_SPLIT_REGEXP);
+        const tokens = this._getTokens(key);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
             this._getWebdriverIOElement(null, this, firstToken),
@@ -92,12 +92,14 @@ class WebdriverIOAbstractPage extends AbstractPage {
                 const promises = collection
                     .map(element => browser.getElementText(element.ELEMENT)
                         .then(text => {
+                            if (parsedToken.isPartialMatch()) {
+                                return text.includes(parsedToken.innerText)
+                            }
                             if (parsedToken.isExactMatch()) {
                                 return text === parsedToken.innerText
-                            } else if (parsedToken.isRegexp()) {
+                            }
+                            if (parsedToken.isRegexp()) {
                                 return parsedToken.innerText.test(text)
-                            } else {
-                                return text.includes(parsedToken.innerText)
                             }
                         }));
                 return Promise.all(promises).then(texts => collection[texts.findIndex(isRightText => isRightText)])
@@ -113,15 +115,14 @@ class WebdriverIOAbstractPage extends AbstractPage {
      * @private
      */
     _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
-        const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
-        const PARTIAL_MORE_LESS_REGEXP = /^[><]\d+$/;
+        if (typeof parsedToken.index === "number") return elementsCollection.then(collection => collection[parsedToken.index - 1]);
         if (parsedToken.index === "FIRST") return elementsCollection.then(collection => collection[0]);
         if (parsedToken.index === "LAST") return elementsCollection.then(collection => collection[collection.length - 1]);
-        if (PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
+        if (regexp.PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
             const [startIndex, endIndex] = parsedToken.index.split("-");
             return elementsCollection.then(collection => collection.filter((_, i) => i >= startIndex - 1 && i <= endIndex - 1));
         }
-        if (PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
+        if (regexp.PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
             const [operator, index] = [parsedToken.index[0], +parsedToken.index.slice(1)];
             switch (operator) {
                 case ">": return elementsCollection.then(collection => collection.filter((_, i) => i > index - 1));
@@ -129,7 +130,6 @@ class WebdriverIOAbstractPage extends AbstractPage {
                 default: throw new Error(`Operator ${operator} is not defined`)
             }
         }
-        return elementsCollection.then(collection => collection[parsedToken.index - 1]);
     }
 
     /**
