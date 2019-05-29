@@ -119,6 +119,14 @@ describe("protractor tests", () => {
         expect(await testPage.getElement("#2-3 of collection").count()).toBe(2);
     });
 
+    it("get part by operator > of collection", async function () {
+        expect(await testPage.getElement("#>1 of collection").count()).toBe(4);
+    });
+
+    it("get part by operator < of collection", async function () {
+        expect(await testPage.getElement("#<3 of collection").count()).toBe(2);
+    });
+
     it("verify did you mean feature", function () {
         function errorHandler() {
             const element = testPage.getElement("component2 > children component > child element")

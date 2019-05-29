@@ -12,6 +12,7 @@ class ParsedToken {
     constructor(token) {
         const ELEMENT_OF_COLLECTION_REGEXP = /([#@/])([!\$]?.+)\s+(in|of)\s+(.+)/;
         const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
+        const PARTIAL_MORE_LESS_REGEXP = /^[><]\d+$/;
 
         if (ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
             const parsedTokens = token.match(ELEMENT_OF_COLLECTION_REGEXP);
@@ -19,7 +20,12 @@ class ParsedToken {
 
             this.modifier = parsedTokens[1];
             this.index = parsedTokens[3] === "of"
-                ? value !== "FIRST" && value !== "LAST" && !PARTIAL_ARRAY_REGEXP.test(value)
+                ? (
+                    value !== "FIRST" &&
+                    value !== "LAST" &&
+                    !PARTIAL_ARRAY_REGEXP.test(value) &&
+                    !PARTIAL_MORE_LESS_REGEXP.test(value)
+                )
                     ? Number.parseInt(value)
                     : value : undefined;
             this.innerText = parsedTokens[3] === "in"
