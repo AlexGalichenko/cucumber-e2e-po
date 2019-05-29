@@ -19,7 +19,7 @@ class WebdriverIOAbstractPage extends AbstractPage {
      * @override
      */
     getElement(key) {
-        const TOKEN_SPLIT_REGEXP = /\s*>\s*/;
+        const TOKEN_SPLIT_REGEXP = /\s>\s/;
         const tokens = key.split(TOKEN_SPLIT_REGEXP);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
@@ -114,11 +114,20 @@ class WebdriverIOAbstractPage extends AbstractPage {
      */
     _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
         const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
+        const PARTIAL_MORE_LESS_REGEXP = /^[><]\d+$/;
         if (parsedToken.index === "FIRST") return elementsCollection.then(collection => collection[0]);
         if (parsedToken.index === "LAST") return elementsCollection.then(collection => collection[collection.length - 1]);
         if (PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
             const [startIndex, endIndex] = parsedToken.index.split("-");
-            return elementsCollection.then(collection => collection.filter((_, i) => i >= startIndex && i <= endIndex));
+            return elementsCollection.then(collection => collection.filter((_, i) => i >= startIndex - 1 && i <= endIndex - 1));
+        }
+        if (PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
+            const [operator, index] = [parsedToken.index[0], +parsedToken.index.slice(1)];
+            switch (operator) {
+                case ">": return elementsCollection.then(collection => collection.filter((_, i) => i > index - 1));
+                case "<": return elementsCollection.then(collection => collection.filter((_, i) => i < index - 1));
+                default: throw new Error(`Operator ${operator} is not defined`)
+            }
         }
         return elementsCollection.then(collection => collection[parsedToken.index - 1]);
     }

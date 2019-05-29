@@ -20,7 +20,7 @@ class ProtractorPage extends AbstractPage {
      * @override
      */
     getElement(key) {
-        const TOKEN_SPLIT_REGEXP = /\s*>\s*/;
+        const TOKEN_SPLIT_REGEXP = /\s>\s/;
         const tokens = key.split(TOKEN_SPLIT_REGEXP);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
@@ -115,11 +115,20 @@ class ProtractorPage extends AbstractPage {
      */
     _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
         const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
+        const PARTIAL_MORE_LESS_REGEXP = /^[><]\d+$/;
         if (parsedToken.index === "FIRST") return elementsCollection.first();
         if (parsedToken.index === "LAST") return elementsCollection.last();
         if (PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
             const [startIndex, endIndex] = parsedToken.index.split("-").map(index => +index);
             return elementsCollection.filter((_, i) => i >= startIndex && i <= endIndex);
+        }
+        if (PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
+            const [operator, index] = [parsedToken.index[0], +parsedToken.index.slice(1)];
+            switch (operator) {
+                case ">": return elementsCollection.filter((_, i) => i > index - 1);
+                case "<": return elementsCollection.filter((_, i) => i < index - 1);
+                default: throw new Error(`Operator ${operator} is not defined`)
+            }
         }
         return elementsCollection.get(parsedToken.index - 1);
     }

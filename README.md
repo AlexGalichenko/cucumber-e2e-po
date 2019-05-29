@@ -81,6 +81,8 @@ const elementOfCollection = page.getElement("#1 of Collection"); //get element o
 const firstElementOfCollection = page.getElement("#FIRST of Collection"); //get element of collection by index
 const lastElementOfCollection = page.getElement("#LAST of Collection"); //get element of collection by index
 const partOfCollection = page.getElement("#2-3 of Collection"); //get part of collection by start index and end index
+const partOfByStartIndexCollection = page.getElement("#>2 of Collection"); //get part of collection by start index
+const partOfByEndIndexCollection = page.getElement("#<4 of Collection"); //get part of collection by end index
 //get element of collection by text (only visible text supported for webdriverIO)
 const elementOfCollectionByText = page.getElement("#Text in Collection");
 //get element of collection by exact text (only visible text supported for webdriverIO)
