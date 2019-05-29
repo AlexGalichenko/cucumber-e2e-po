@@ -115,6 +115,10 @@ describe("webdriverIO tests", () => {
         expect((await testPage.getElement("component2 > child component > child element")).length).toBe(3);
     });
 
+    it("get part of collection", async function () {
+        expect((await testPage.getElement("#2-3 of collection")).length).toBe(2);
+    });
+
     // it("verify did you mean feature", async function () {
     //     try {
     //         await testPage.getElement("component2 > children component > child element")

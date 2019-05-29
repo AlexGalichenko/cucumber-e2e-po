@@ -4,6 +4,7 @@ const ParsedToken = require("./ParsedToken");
 const NoSuchElementException = require("./exception/NoSuchElementException");
 
 /**
+ * @global element from protractor
  * @extends {AbstractPage}
  */
 class ProtractorPage extends AbstractPage {
@@ -80,6 +81,7 @@ class ProtractorPage extends AbstractPage {
      * Get element from collection by text
      * @param elementsCollection - collection to select from
      * @param parsedToken - token to select element
+     * @param rootElement - root element
      * @return {ElementFinder|ElementArrayFinder} - new protractor element
      * @private
      */
@@ -112,11 +114,14 @@ class ProtractorPage extends AbstractPage {
      * @private
      */
     _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
-        switch (parsedToken.index) {
-            case "FIRST": return elementsCollection.first();
-            case "LAST": return elementsCollection.last();
-            default: return elementsCollection.get(parsedToken.index - 1)
+        const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
+        if (parsedToken.index === "FIRST") return elementsCollection.first();
+        if (parsedToken.index === "LAST") return elementsCollection.last();
+        if (PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
+            const [startIndex, endIndex] = parsedToken.index.split("-").map(index => +index);
+            return elementsCollection.filter((_, i) => i >= startIndex && i <= endIndex);
         }
+        return elementsCollection.get(parsedToken.index - 1);
     }
 
     /**
@@ -189,7 +194,7 @@ class ProtractorPage extends AbstractPage {
                 } else {
                     throw new Error("Text is not defined")
                 }
-            } break;
+            }
             default: throw new Error(`Selector type ${element.selectorType} is not defined`);
         }
     }
@@ -212,7 +217,7 @@ class ProtractorPage extends AbstractPage {
      * Transform locator for text selection
      * @param locator - locator
      * @param text - text
-     * @return {ProtractorLocator}
+     * @return {ProtractorLocator|Object}
      * @private
      */
     _transformLocatorByText(locator, text) {

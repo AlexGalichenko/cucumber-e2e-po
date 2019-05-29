@@ -1,6 +1,6 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
