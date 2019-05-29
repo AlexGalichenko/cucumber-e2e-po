@@ -60,7 +60,11 @@ class NoSuchElementException extends Error {
     constructor(alias, currentComponent) {
         const comparator = NoSuchElementException.levenshteinComparator(alias);
         const message = `There is no such element: '${alias}'\nDid you mean:\n`
-            + Array.from(currentComponent.elements.keys()).sort(comparator).slice(0, 3).join("\n");
+            + Array.from(currentComponent.elements.keys())
+                .sort(comparator)
+                .slice(0, 3)
+                .filter((suggestion, index) => index === 0 || NoSuchElementException.levenshtein(alias, suggestion) < suggestion.length)
+                .join("\n");
         super(message);
     }
 

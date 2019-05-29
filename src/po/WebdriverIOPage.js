@@ -113,11 +113,14 @@ class WebdriverIOAbstractPage extends AbstractPage {
      * @private
      */
     _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
-        switch (parsedToken.index) {
-            case "FIRST": return elementsCollection.then(collection => collection[0]);
-            case "LAST": return elementsCollection.then(collection => collection[collection.length - 1]);
-            default: return elementsCollection.then(collection => collection[parsedToken.index - 1])
+        const PARTIAL_ARRAY_REGEXP = /^\d+-\d+$/;
+        if (parsedToken.index === "FIRST") return elementsCollection.then(collection => collection[0]);
+        if (parsedToken.index === "LAST") return elementsCollection.then(collection => collection[collection.length - 1]);
+        if (PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
+            const [startIndex, endIndex] = parsedToken.index.split("-");
+            return elementsCollection.then(collection => collection.filter((_, i) => i >= startIndex && i <= endIndex));
         }
+        return elementsCollection.then(collection => collection[parsedToken.index - 1]);
     }
 
     /**
