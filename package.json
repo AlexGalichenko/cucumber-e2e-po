@@ -1,11 +1,11 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
     "docs": "jsdoc ./src/ -r -t ./node_modules/minami",
-    "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\"",
     "test:protractor": "protractor ./test/protractor.conf.js",
     "test:webdriverio": "wdio ./test/webdriverio.conf.js",
     "pretest:protractor": "webdriver-manager update",
