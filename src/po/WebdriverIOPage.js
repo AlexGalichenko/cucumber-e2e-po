@@ -67,7 +67,9 @@ class WebdriverIOAbstractPage extends AbstractPage {
         const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
         return rootElement.then(element => {
             if (newComponent.isCollection) {
-                const elementsCollection = element.$$(this._getSelector(newComponent));
+                const elementsCollection = parsedToken.alias !== "this"
+                    ? element.$$(this._getSelector(newComponent))
+                    : Promise.resolve(element);
                 if (parsedToken.hasTokenIn()) return this._getElementOfCollectionByText(elementsCollection, parsedToken);
                 if (parsedToken.hasTokenOf()) return this._getElementOfCollectionByIndex(elementsCollection, parsedToken);
             } else {
@@ -161,11 +163,9 @@ class WebdriverIOAbstractPage extends AbstractPage {
      */
     _getComponent(currentComponent, token) {
         const parsedToken = new ParsedToken(token);
-        if (currentComponent.elements.has(parsedToken.alias)) {
-            return currentComponent.elements.get(parsedToken.alias)
-        } else {
-            throw new NoSuchElementException(parsedToken.alias, currentComponent);
-        }
+        if (parsedToken.alias === "this") return currentComponent;
+        if (currentComponent.elements.has(parsedToken.alias)) return currentComponent.elements.get(parsedToken.alias);
+        throw new NoSuchElementException(parsedToken.alias, currentComponent);
     }
 
     /**

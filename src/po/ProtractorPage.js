@@ -66,7 +66,9 @@ class ProtractorPage extends AbstractPage {
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
         const rootElement = currentProtractorElement ? currentProtractorElement : element;
         if (newComponent.isCollection) {
-            const elementsCollection = rootElement.all(this._getSelector(newComponent));
+            const elementsCollection = parsedToken.alias !== "this"
+                ? rootElement.all(this._getSelector(newComponent))
+                : rootElement;
             if (parsedToken.hasTokenIn()) return this._getElementOfCollectionByText(elementsCollection, parsedToken, rootElement);
             if (parsedToken.hasTokenOf()) return this._getElementOfCollectionByIndex(elementsCollection, parsedToken);
         } else {
@@ -86,7 +88,7 @@ class ProtractorPage extends AbstractPage {
         let elementFinder;
         if (parsedToken.isPartialMatch()) {
             const locator = elementsCollection.locator();
-            if (this._isLocatorTranformable(locator)) {
+            if (this._isLocatorTranformable(locator) && parsedToken.alias !== "this") {
                 elementFinder = rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText));
             } else {
                 elementFinder = elementsCollection
@@ -168,11 +170,9 @@ class ProtractorPage extends AbstractPage {
      */
     _getComponent(currentComponent, token) {
         const parsedToken = new ParsedToken(token);
-        if (currentComponent.elements.has(parsedToken.alias)) {
-            return currentComponent.elements.get(parsedToken.alias)
-        } else {
-            throw new NoSuchElementException(parsedToken.alias, currentComponent);
-        }
+        if (parsedToken.alias === "this") return currentComponent;
+        if (currentComponent.elements.has(parsedToken.alias)) return currentComponent.elements.get(parsedToken.alias);
+        throw new NoSuchElementException(parsedToken.alias, currentComponent);
     }
 
     /**
