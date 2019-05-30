@@ -127,6 +127,18 @@ describe("webdriverIO tests", () => {
         expect((await testPage.getElement("#<3 of collection")).length).toBe(2);
     });
 
+    it("get subset from collection by partial text", async function () {
+        expect((await testPage.getElement("all #Third in collection")).length).toBe(2);
+    });
+
+    it("get subset from collection by exact text", async function () {
+        expect((await testPage.getElement("all @Third in collection")).length).toBe(1);
+    });
+
+    it("get subset from collection by regexp", async function () {
+        expect((await testPage.getElement("all /Third/ in collection")).length).toBe(2);
+    });
+
     // it("verify did you mean feature", async function () {
     //     try {
     //         await testPage.getElement("component2 > children component > child element")

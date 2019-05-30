@@ -18,5 +18,5 @@ exports.config = {
         defaultTimeoutInterval: 20000,
     },
     sync: false,
-    logLevel: "silent",
+    logLevel: "trace",
 };

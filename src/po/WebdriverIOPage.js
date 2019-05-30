@@ -68,11 +68,8 @@ class WebdriverIOAbstractPage extends AbstractPage {
         return rootElement.then(element => {
             if (newComponent.isCollection) {
                 const elementsCollection = element.$$(this._getSelector(newComponent));
-                if (parsedToken.hasTokenIn()) {
-                    return this._getElementOfCollectionByText(elementsCollection, parsedToken)
-                } else if (parsedToken.hasTokenOf()) {
-                    return this._getElementOfCollectionByIndex(elementsCollection, parsedToken)
-                }
+                if (parsedToken.hasTokenIn()) return this._getElementOfCollectionByText(elementsCollection, parsedToken);
+                if (parsedToken.hasTokenOf()) return this._getElementOfCollectionByIndex(elementsCollection, parsedToken);
             } else {
                 throw new Error(`${parsedToken.alias} is not collection`)
             }
@@ -92,17 +89,14 @@ class WebdriverIOAbstractPage extends AbstractPage {
                 const promises = collection
                     .map(element => browser.getElementText(element.ELEMENT)
                         .then(text => {
-                            if (parsedToken.isPartialMatch()) {
-                                return text.includes(parsedToken.innerText)
-                            }
-                            if (parsedToken.isExactMatch()) {
-                                return text === parsedToken.innerText
-                            }
-                            if (parsedToken.isRegexp()) {
-                                return parsedToken.innerText.test(text)
-                            }
+                            if (parsedToken.isPartialMatch()) return text.includes(parsedToken.innerText);
+                            if (parsedToken.isExactMatch()) return text === parsedToken.innerText;
+                            if (parsedToken.isRegexp()) return parsedToken.innerText.test(text);
                         }));
-                return Promise.all(promises).then(texts => collection[texts.findIndex(isRightText => isRightText)])
+                return Promise.all(promises).then(results => {
+                    if (!parsedToken.hasAllModifier()) return collection.find((element, index) => results[index]);
+                    return collection.filter((element, index) => results[index])
+                })
             }
         )
     }

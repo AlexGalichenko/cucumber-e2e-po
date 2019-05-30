@@ -89,6 +89,12 @@ const elementOfCollectionByText = page.getElement("#Text in Collection");
 const elementOfCollectionByExactText = page.getElement("@Text in Collection");
 //get element of collection by regexp text (only visible text supported for webdriverIO)
 const elementOfCollectionByRegexp = page.getElement("/endwith$/ in Collection");
+//get subset of collection by text (only visible text supported for webdriverIO)
+const subsetOfCollectionByText = page.getElement("all #Text in Collection");
+//get subset of collection by exact text (only visible text supported for webdriverIO)
+const subsetOfCollectionByExactText = page.getElement("all @Text in Collection");
+//get subset of collection by regexp text (only visible text supported for webdriverIO)
+const subsetOfCollectionByRegexp = page.getElement("all /endwith$/ in Collection");
 ```
 ## Component
 ```javascript
