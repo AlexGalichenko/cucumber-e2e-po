@@ -76,19 +76,41 @@ To get element from page call getElement method with alias of provided element.
 ```javascript
 const page = State.getPage();
 const element = page.getElement("Simple Element"); //get single element or collection
+
 const elementOfComponent = page.getElement("Component > Element"); //get element or collection of component
+
 const elementOfCollection = page.getElement("#1 of Collection"); //get element of collection by index
+
 const firstElementOfCollection = page.getElement("#FIRST of Collection"); //get element of collection by index
+
 const lastElementOfCollection = page.getElement("#LAST of Collection"); //get element of collection by index
+
 const partOfCollection = page.getElement("#2-3 of Collection"); //get part of collection by start index and end index
+
 const partOfByStartIndexCollection = page.getElement("#>2 of Collection"); //get part of collection by start index
+
 const partOfByEndIndexCollection = page.getElement("#<4 of Collection"); //get part of collection by end index
+
 //get element of collection by text (only visible text supported for webdriverIO)
 const elementOfCollectionByText = page.getElement("#Text in Collection");
+
 //get element of collection by exact text (only visible text supported for webdriverIO)
 const elementOfCollectionByExactText = page.getElement("@Text in Collection");
+
 //get element of collection by regexp text (only visible text supported for webdriverIO)
 const elementOfCollectionByRegexp = page.getElement("/endwith$/ in Collection");
+
+//get subset of collection by text (only visible text supported for webdriverIO)
+const subsetOfCollectionByText = page.getElement("all #Text in Collection");
+
+//get subset of collection by exact text (only visible text supported for webdriverIO)
+const subsetOfCollectionByExactText = page.getElement("all @Text in Collection");
+
+//get subset of collection by regexp text (only visible text supported for webdriverIO)
+const subsetOfCollectionByRegexp = page.getElement("all /endwith$/ in Collection");
+
+//work with last iteration result via pseudocomponent this
+const thisOfCollectionByText = page.getElement("all #Text in Collection > #1 of this");
 ```
 ## Component
 ```javascript

@@ -14,10 +14,11 @@ class ParsedToken {
     constructor(token) {
         if (regexp.ELEMENT_OF_COLLECTION_REGEXP.test(token)) {
             const parsedTokens = token.match(regexp.ELEMENT_OF_COLLECTION_REGEXP);
-            const value = parsedTokens[2];
+            const value = parsedTokens[3];
 
-            this.modifier = parsedTokens[1];
-            this.index = parsedTokens[3] === "of"
+            this.allModifier = parsedTokens[1];
+            this.modifier = parsedTokens[2];
+            this.index = parsedTokens[4] === "of"
                 ? (
                     value !== "FIRST" &&
                     value !== "LAST" &&
@@ -26,12 +27,12 @@ class ParsedToken {
                 )
                     ? Number.parseInt(value)
                     : value : undefined;
-            this.innerText = parsedTokens[3] === "in"
+            this.innerText = parsedTokens[4] === "in"
                 ? this.modifier !== "/"
                     ? value
                     : new RegExp(value.replace(/\/$/, ""), "gmi")
                 : undefined;
-            this.alias = parsedTokens[4];
+            this.alias = parsedTokens[5];
         } else {
             this.alias = token;
         }
@@ -74,6 +75,10 @@ class ParsedToken {
 
     isRegexp() {
         return this.modifier === "/"
+    }
+
+    hasAllModifier() {
+        return !!this.allModifier
     }
 
 }

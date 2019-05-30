@@ -127,6 +127,30 @@ describe("protractor tests", () => {
         expect(await testPage.getElement("#<3 of collection").count()).toBe(2);
     });
 
+    it("get subset from collection by partial text", async function () {
+        expect(await testPage.getElement("all #Third in collection").count()).toBe(2);
+    });
+
+    it("get subset from collection by exact text", async function () {
+        expect(await testPage.getElement("all @Third in collection").count()).toBe(1);
+    });
+
+    it("get subset from collection by regexp", async function () {
+        expect(await testPage.getElement("all /Third/ in collection").count()).toBe(2);
+    });
+
+    it("get subset from collection by partial text", async function () {
+        expect(await testPage.getElement("all #Third in collection > #1 of this").getText()).toBe("Third");
+    });
+
+    it("get subset from collection by exact text", async function () {
+        expect(await testPage.getElement("all @Third in collection > #Third in this").getText()).toBe("Third");
+    });
+
+    it("get subset from collection by regexp", async function () {
+        expect(await testPage.getElement("all /Third/ in collection > all @Third in this").count()).toBe(1);
+    });
+
     it("verify did you mean feature", function () {
         function errorHandler() {
             const element = testPage.getElement("component2 > children component > child element")
