@@ -1,6 +1,6 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.8.0",
+  "version": "0.8.2",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
@@ -54,6 +54,9 @@
     ]
   },
   "author": "Alexander Galichenko",
+  "contributors": [
+    "Aliaksandr Kruk"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -71,4 +74,5 @@
     "protractor": "^5.4.2",
     "webdriverio": "^5.8.3"
   }
+
 }
