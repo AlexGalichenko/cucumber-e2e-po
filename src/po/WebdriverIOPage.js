@@ -93,7 +93,7 @@ class WebdriverIOAbstractPage extends AbstractPage {
                         .then(text => {
                             if (parsedToken.isPartialMatch()) return text.includes(parsedToken.innerText);
                             if (parsedToken.isExactMatch()) return text === parsedToken.innerText;
-                            if (parsedToken.isRegexp()) return parsedToken.innerText.test(text);
+                            if (parsedToken.isRegexp()) return new RegExp(parsedToken.innerText).test(text);
                         }));
                 return Promise.all(promises).then(results => {
                     if (!parsedToken.hasAllModifier()) return collection.find((element, index) => results[index]);

@@ -30,7 +30,7 @@ class ParsedToken {
             this.innerText = parsedTokens[4] === "in"
                 ? this.modifier !== "/"
                     ? value
-                    : new RegExp(value.replace(/\/$/, ""), "gmi")
+                    : value.replace(/\/$/, "")
                 : undefined;
             this.alias = parsedTokens[5];
         } else {

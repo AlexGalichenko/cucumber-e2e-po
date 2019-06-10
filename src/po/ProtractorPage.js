@@ -106,7 +106,7 @@ class ProtractorPage extends AbstractPage {
         }
         if (parsedToken.isRegexp()) {
             elementFinder = elementsCollection
-                .filter(elem => elem.getText().then(text => parsedToken.innerText.test(text)));
+                .filter(elem => elem.getText().then(text => new RegExp(parsedToken.innerText, "gmi").test(text)));
             if (!parsedToken.hasAllModifier()) return elementFinder.first();
             return elementFinder
         }
