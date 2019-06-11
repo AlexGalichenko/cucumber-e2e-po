@@ -125,7 +125,7 @@ class ProtractorPage extends AbstractPage {
         if (parsedToken.index === "LAST") return elementsCollection.last();
         if (regexp.PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
             const [startIndex, endIndex] = parsedToken.index.split("-").map(index => +index);
-            return elementsCollection.filter((_, i) => i >= startIndex && i <= endIndex);
+            return elementsCollection.filter((_, i) => i >= startIndex - 1 && i <= endIndex - 1);
         }
         if (regexp.PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
             const [operator, index] = [parsedToken.index[0], +parsedToken.index.slice(1)];
