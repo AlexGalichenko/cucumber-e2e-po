@@ -45,10 +45,11 @@ const page = State.getPage();
 PO model supports both Protractor and WebdriverIO.
 ```javascript
 /**
-* Recomended to define base page extended from AbstractPage
+* Recommended to define base page extended from AbstractPage
 **/
 const ProtractorPage = require("@cucumber-e2e/po").ProtractorPage;
 const WebdriverIOPage = require("@cucumber-e2e/po").WebdriverIOPage;
+const SeleniumPage = require("@cucumber-e2e/po").SeleniumPage;
 const CustomComponent = require("./CustomComponent");
 
 class CustomPage extends ProtractorPage {
@@ -71,6 +72,10 @@ class CustomPage extends ProtractorPage {
         });
     }
 }
+
+//Instance of Selenium page require setting webdriver instance before calling getElement method
+State.getPage().setDriver(yourDriver);
+const page = new CustomPage().setDriver(yourDriver);
 ```
 To get element from page call getElement method with alias of provided element.
 ```javascript

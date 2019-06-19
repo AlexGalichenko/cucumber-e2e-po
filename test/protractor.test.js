@@ -77,6 +77,15 @@ describe("protractor tests", () => {
             alias: "collection",
             selector: "ol > li"
         });
+
+        testPage.defineElement({
+            alias: "single element js",
+            selector: function () {
+                return document.querySelector(".single-element")
+            },
+            // selector: "return document.querySelector(\".single-element\")",
+            selectorType: "js"
+        });
     });
 
     it("get single element", async () => {
@@ -158,5 +167,9 @@ describe("protractor tests", () => {
         expect(errorHandler).toThrowError(
             "There is no such element: 'children component'\nDid you mean:\nchild component"
         );
+    });
+
+    it("get single element by js", async () => {
+        expect(await testPage.getElement("single element js").getText()).toBe("text of single element");
     });
 });

@@ -81,6 +81,14 @@ class ParsedToken {
         return !!this.allModifier
     }
 
+    /**
+     * Get tokens array from alias
+     * @param alias
+     */
+    static getTokens(alias) {
+        return alias.split(regexp.TOKEN_SPLIT_REGEXP);
+    }
+
 }
 
 module.exports = ParsedToken;

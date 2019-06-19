@@ -21,7 +21,7 @@ class ProtractorPage extends AbstractPage {
      * @override
      */
     getElement(key) {
-        const tokens = this._getTokens(key);
+        const tokens = ParsedToken.getTokens(key);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
             this._getProtractorElement(null, this, firstToken),
