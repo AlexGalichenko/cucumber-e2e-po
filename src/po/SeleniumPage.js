@@ -7,10 +7,22 @@ const regexp = require("./helpers/regexp");
 /**
  * @extends {AbstractPage}
  */
-class WebdriverIOAbstractPage extends AbstractPage {
+class SeleniumPage extends AbstractPage {
 
     constructor() {
         super();
+        this.driver = null;
+    }
+
+    /**
+     * Set instance of webdriver.
+     * Need to be done before call getElement()
+     * @param driver {WebDriver} - instance of webdriver
+     * @return {SeleniumPage}
+     */
+    setDriver(driver) {
+        this.driver = driver;
+        return this
     }
 
     /**
@@ -26,14 +38,14 @@ class WebdriverIOAbstractPage extends AbstractPage {
             this._getWebdriverIOElement(null, this, firstToken),
             this._getComponent(this, firstToken)
         );
-        const webdriverIOElement = tokens.reduce((current, token) => {
+        const seleniumElement = tokens.reduce((current, token) => {
             return new ComponentNode(
                 this._getWebdriverIOElement(current.element, current.component, token),
                 this._getComponent(current.component, token)
             )
         }, startNode);
 
-        return webdriverIOElement.element;
+        return seleniumElement.element;
     }
 
     /**
@@ -62,13 +74,13 @@ class WebdriverIOAbstractPage extends AbstractPage {
      * @private
      */
     _getElementOfCollection(currentElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = "html";
+        const ROOT_ELEMENT_SELECTOR = {css: "html"};
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
+        const rootElement = currentElement ? currentElement : this.driver.findElement(ROOT_ELEMENT_SELECTOR);
         return rootElement.then(element => {
             if (newComponent.isCollection) {
                 const elementsCollection = parsedToken.alias !== "this"
-                    ? element.$$(this._getSelector(newComponent))
+                    ? element.findElements(this._getSelector(newComponent))
                     : Promise.resolve(element);
                 if (parsedToken.hasTokenIn()) return this._getElementOfCollectionByText(elementsCollection, parsedToken);
                 if (parsedToken.hasTokenOf()) return this._getElementOfCollectionByIndex(elementsCollection, parsedToken);
@@ -89,7 +101,7 @@ class WebdriverIOAbstractPage extends AbstractPage {
         return elementsCollection.then(
             collection => {
                 const promises = collection
-                    .map(element => browser.getElementText(element.ELEMENT)
+                    .map(element => element.getText()
                         .then(text => {
                             if (parsedToken.isPartialMatch()) return text.includes(parsedToken.innerText);
                             if (parsedToken.isExactMatch()) return text === parsedToken.innerText;
@@ -137,17 +149,17 @@ class WebdriverIOAbstractPage extends AbstractPage {
      * @private
      */
     _getElementOrCollection(currentElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = "html";
+        const ROOT_ELEMENT_SELECTOR = {css: "html"};
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentElement ? currentElement : $(ROOT_ELEMENT_SELECTOR);
+        const rootElement = currentElement ? currentElement : this.driver.findElement(ROOT_ELEMENT_SELECTOR);
         if (newComponent.isCollection) {
-            return rootElement.then(element => element.$$(this._getSelector(newComponent)));
+            return rootElement.then(element => element.findElements(this._getSelector(newComponent)));
         } else {
             return rootElement.then(element => {
                 if (element.length) {
-                    return Promise.all(element.map(item => item.$(this._getSelector(newComponent))))
+                    return Promise.all(element.map(item => item.findElement(this._getSelector(newComponent))))
                 } else {
-                    return element.$(this._getSelector(newComponent))
+                    return element.findElement(this._getSelector(newComponent))
                 }
             });
         }
@@ -171,18 +183,41 @@ class WebdriverIOAbstractPage extends AbstractPage {
     /**
      * Resolve element by location strategy
      * @param {Element|Collection|Component} element - element to get selector
-     * @return {*} - by selector
+     * @return {WebDriverLocator|ProtractorLocator|Object} - by selector
      * @throws {Error}
      * @private
      */
     _getSelector(element) {
         switch (element.selectorType) {
-            case "css": return element.selector;
-            case "xpath": return element.selector;
+            case "css": return {
+                using: 'css selector',
+                value: element.selector
+            };
+            case "xpath": return {
+                using: 'xpath',
+                value: element.selector
+            };
+            //todo fix bug that will allow to pass params into function
+            case "js": return function(context) {
+                const driver = context.driver_ ||context;
+                return driver.executeScript.apply(driver, [element.selector]);
+            };
+            case "android": return {
+                using: "-android uiautomator",
+                value: element.selector
+            };
+            case "ios": return {
+                using: "-ios uiautomation",
+                value: element.selector
+            };
+            case "accessibilityId": return {
+                using: "accessibility id",
+                value: element.selector
+            };
             default: throw new Error(`Selector type ${element.selectorType} is not defined`);
         }
     }
 
 }
 
-module.exports = WebdriverIOAbstractPage;
+module.exports = SeleniumPage;

@@ -82,15 +82,6 @@ class AbstractPage {
         }
     }
 
-    /**
-     * Get tokens array from alias
-     * @param alias
-     * @protected
-     */
-    _getTokens(alias) {
-        return alias.split(regexp.TOKEN_SPLIT_REGEXP);
-    }
-
 }
 
 module.exports = AbstractPage;

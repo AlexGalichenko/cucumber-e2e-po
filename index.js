@@ -4,4 +4,5 @@ exports.Component = require('./lib/po/Component');
 exports.Element = require('./lib/po/Element');
 exports.ProtractorPage = require('./lib/po/ProtractorPage');
 exports.WebdriverIOPage = require('./lib/po/WebdriverIOPage');
+exports.SeleniumPage = require('./lib/po/SeleniumPage');
 exports.PageMap = require('./lib/page_map/PageMap');
