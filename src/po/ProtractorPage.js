@@ -3,6 +3,7 @@ const ComponentNode = require("./ComponentNode");
 const ParsedToken = require("./ParsedToken");
 const NoSuchElementException = require("./exception/NoSuchElementException");
 const regexp = require("./helpers/regexp");
+const scripts = require("./scripts/scripts");
 
 /**
  * @global element from protractor
@@ -12,6 +13,9 @@ class ProtractorPage extends AbstractPage {
 
     constructor() {
         super();
+        if (!by.cssExactText) {
+            by.addLocator("cssExactText", scripts.getAllElementsByCssExactText);
+        }
     }
 
     /**
@@ -86,30 +90,28 @@ class ProtractorPage extends AbstractPage {
      */
     _getElementOfCollectionByText(elementsCollection, parsedToken, rootElement) {
         let elementFinder;
+        let mode;
+        let resolver;
+        const locator = elementsCollection.locator();
         if (parsedToken.isPartialMatch()) {
-            const locator = elementsCollection.locator();
-            if (this._isLocatorTranformable(locator) && parsedToken.alias !== "this") {
-                elementFinder = rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText));
-            } else {
-                elementFinder = elementsCollection
-                    .filter(elem => elem.getText().then(text => text.includes(parsedToken.innerText)));
-            }
-            if (!parsedToken.hasAllModifier()) return elementFinder.first();
-            return elementFinder
+            mode = "partial";
+            resolver = elem => elem.getText().then(text => text.includes(parsedToken.innerText));
         }
         if (parsedToken.isExactMatch()) {
-            elementFinder = elementsCollection
-                .filter(elem => elem.getText().then(text => text === parsedToken.innerText));
-
-            if (!parsedToken.hasAllModifier()) return elementFinder.first();
-            return elementFinder
+            mode = "exact";
+            resolver = elem => elem.getText().then(text => text === parsedToken.innerText);
         }
         if (parsedToken.isRegexp()) {
-            elementFinder = elementsCollection
-                .filter(elem => elem.getText().then(text => new RegExp(parsedToken.innerText, "gmi").test(text)));
-            if (!parsedToken.hasAllModifier()) return elementFinder.first();
-            return elementFinder
+            mode = "regexp";
+            resolver = elem => elem.getText().then(text => new RegExp(parsedToken.innerText, "gmi").test(text));
         }
+        if (this._isLocatorTranformable(locator) && parsedToken.alias !== "this") {
+            elementFinder = rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText, mode));
+        } else {
+            elementFinder = elementsCollection.filter(resolver);
+        }
+        if (parsedToken.hasAllModifier()) return elementFinder;
+        return elementFinder.first()
     }
 
     /**
@@ -228,12 +230,19 @@ class ProtractorPage extends AbstractPage {
      * Transform locator for text selection
      * @param locator - locator
      * @param text - text
+     * @param mode - mode of transformation
      * @return {ProtractorLocator|Object}
      * @private
      */
-    _transformLocatorByText(locator, text) {
+    _transformLocatorByText(locator, text, mode) {
         switch (locator.using) {
-            case "css selector": return by.cssContainingText(locator.value, text);
+            case "css selector": {
+                switch (mode) {
+                    case "partial": return by.cssContainingText(locator.value, text);
+                    case "exact": return by.cssExactText(locator.value, text);
+                    case "regexp": return by.cssContainingText(locator.value, new RegExp(text));
+                }
+            } break;
             case "android": return {
                 using: "-android uiautomator",
                 value: element.selector + ".text(\"" + text + "\")"
