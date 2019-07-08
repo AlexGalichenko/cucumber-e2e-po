@@ -28,19 +28,19 @@ class SeleniumPage extends AbstractPage {
     /**
      * Get element by key
      * @param {string} key - key
-     * @return {*} - webdriverIO element
+     * @return {*} - selenium element
      * @override
      */
     getElement(key) {
         const tokens = ParsedToken.getTokens(key);
         const firstToken = tokens.shift();
         const startNode = new ComponentNode(
-            this._getWebdriverIOElement(null, this, firstToken),
+            this._getSeleniumElement(null, this, firstToken),
             this._getComponent(this, firstToken)
         );
         const seleniumElement = tokens.reduce((current, token) => {
             return new ComponentNode(
-                this._getWebdriverIOElement(current.element, current.component, token),
+                this._getSeleniumElement(current.element, current.component, token),
                 this._getComponent(current.component, token)
             )
         }, startNode);
@@ -49,14 +49,14 @@ class SeleniumPage extends AbstractPage {
     }
 
     /**
-     * Get webdriverIO single element or collection of elements or element from collection
+     * Get selenium single element or collection of elements or element from collection
      * @param {*} currentElement - current element
-     * @param {WebdriverIOAbstractPage|Component} currentComponent - current component
+     * @param {AbstractPage|Component} currentComponent - current component
      * @param {string} token - token to get new element
      * @return {*} - return new element
      * @private
      */
-    _getWebdriverIOElement(currentElement, currentComponent, token) {
+    _getSeleniumElement(currentElement, currentComponent, token) {
         const parsedToken = new ParsedToken(token);
         if (parsedToken.isElementOfCollection()) {
             return this._getElementOfCollection(currentElement, currentComponent, parsedToken)
@@ -66,11 +66,11 @@ class SeleniumPage extends AbstractPage {
     }
 
     /**
-     * Get webdriverIO element by index or text
+     * Get selenium element by index or text
      * @param {*} currentElement - current element
      * @param {Component} currentComponent - current component
      * @param {ParsedToken} parsedToken - parsed token
-     * @return {*} - new webdriverIO element
+     * @return {*} - new selenium element
      * @private
      */
     _getElementOfCollection(currentElement, currentComponent, parsedToken) {
@@ -141,11 +141,11 @@ class SeleniumPage extends AbstractPage {
     }
 
     /**
-     * Get webdriverIO element or collection
+     * Get selenium element or collection
      * @param {*} currentElement - current element
      * @param {Component} currentComponent - current component
      * @param {ParsedToken} parsedToken - alias
-     * @return {*} - new webdriverIO element
+     * @return {*} - new selenium element
      * @private
      */
     _getElementOrCollection(currentElement, currentComponent, parsedToken) {

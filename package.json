@@ -1,14 +1,15 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "description": "Implementation of page object patter for cucumber + boilerplate testing framework",
   "main": "index.js",
   "scripts": {
     "docs": "jsdoc ./src/ -r -t ./node_modules/minami",
-    "test:unit": "jest --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\" --testPathIgnorePatterns=\"selenium.test.js\"",
+    "test:unit": "jest --testPathIgnorePatterns=\"testcafe.test.js\" --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\" --testPathIgnorePatterns=\"selenium.test.js\"",
     "test:protractor": "protractor ./test/protractor.conf.js",
+    "test:testcafe": "testcafe chrome ./test/testcafe.test.js",
     "test:webdriverio": "wdio ./test/webdriverio.conf.js",
-    "test:selenium": "jest --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\" --testPathIgnorePatterns=\"abstractPage.test.js\" --testPathIgnorePatterns=\"pageMap.test.js\"",
+    "test:selenium": "jest --testPathIgnorePatterns=\"testcafe.test.js\" --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\" --testPathIgnorePatterns=\"abstractPage.test.js\" --testPathIgnorePatterns=\"pageMap.test.js\"",
     "pretest:protractor": "webdriver-manager update",
     "build": "babel src -d lib",
     "prepublish": "npm run build"
@@ -69,11 +70,13 @@
     "@wdio/local-runner": "^5.10.1",
     "@wdio/selenium-standalone-service": "^5.9.3",
     "@wdio/spec-reporter": "^5.9.3",
+    "chai": "^4.2.0",
     "jest": "^24.8.0",
     "jsdoc": "^3.6.2",
     "minami": "^1.2.3",
     "protractor": "^5.4.2",
     "selenium-webdriver": "^4.0.0-alpha.3",
+    "testcafe": "^1.3.1",
     "webdriverio": "^5.10.1"
   }
 }
