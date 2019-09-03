@@ -65,20 +65,44 @@ class ParsedToken {
         return this.innerText !== undefined
     }
 
+    /**
+     * Check if token is exact match
+     * @return {boolean}
+     */
     isExactMatch() {
         return this.modifier === "@"
     }
 
+    /**
+     * Check if token is partial match
+     * @return {boolean}
+     */
     isPartialMatch() {
         return this.modifier === "#"
     }
 
+    /**
+     * Check if token is regexp
+     * @return {boolean}
+     */
     isRegexp() {
         return this.modifier === "/"
     }
 
+    /**
+     * Check if token has all modifier
+     * @return {boolean}
+     */
     hasAllModifier() {
         return !!this.allModifier
+    }
+
+    /**
+     * Check if current token is pseudo component this
+     * @return {boolean}
+     */
+    isThis() {
+        return this.alias === "this"
     }
 
     /**

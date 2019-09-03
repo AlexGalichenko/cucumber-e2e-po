@@ -13,9 +13,6 @@ class ProtractorPage extends AbstractPage {
 
     constructor() {
         super();
-        if (!by.cssExactText) {
-            by.addLocator("cssExactText", scripts.getAllElementsByCssExactText);
-        }
     }
 
     /**
@@ -70,7 +67,7 @@ class ProtractorPage extends AbstractPage {
         const newComponent = this._getComponent(currentComponent, parsedToken.alias);
         const rootElement = currentProtractorElement ? currentProtractorElement : element;
         if (newComponent.isCollection) {
-            const elementsCollection = parsedToken.alias !== "this"
+            const elementsCollection = !parsedToken.isThis()
                 ? rootElement.all(this._getSelector(newComponent))
                 : rootElement;
             if (parsedToken.hasTokenIn()) return this._getElementOfCollectionByText(elementsCollection, parsedToken, rootElement);
@@ -105,7 +102,7 @@ class ProtractorPage extends AbstractPage {
             mode = "regexp";
             resolver = elem => elem.getText().then(text => new RegExp(parsedToken.innerText, "gmi").test(text));
         }
-        if (this._isLocatorTranformable(locator) && parsedToken.alias !== "this") {
+        if (this._isLocatorTranformable(locator) && !parsedToken.isThis()) {
             elementFinder = rootElement.all(this._transformLocatorByText(locator, parsedToken.innerText, mode));
         } else {
             elementFinder = elementsCollection.filter(resolver);
@@ -172,7 +169,7 @@ class ProtractorPage extends AbstractPage {
      */
     _getComponent(currentComponent, token) {
         const parsedToken = new ParsedToken(token);
-        if (parsedToken.alias === "this") return currentComponent;
+        if (parsedToken.isThis()) return currentComponent;
         if (currentComponent.elements.has(parsedToken.alias)) return currentComponent.elements.get(parsedToken.alias);
         throw new NoSuchElementException(parsedToken.alias, currentComponent);
     }
@@ -239,7 +236,12 @@ class ProtractorPage extends AbstractPage {
             case "css selector": {
                 switch (mode) {
                     case "partial": return by.cssContainingText(locator.value, text);
-                    case "exact": return by.cssExactText(locator.value, text);
+                    case "exact": {
+                        if (!by.cssExactText) {
+                            by.addLocator("cssExactText", scripts.getAllElementsByCssExactText);
+                        }
+                        return by.cssExactText(locator.value, text);
+                    }
                     case "regexp": return by.cssContainingText(locator.value, new RegExp(text));
                 }
             } break;
