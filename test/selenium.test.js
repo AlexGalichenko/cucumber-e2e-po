@@ -4,7 +4,7 @@ const Component = require("../lib/po/Component");
 const {Builder, By, until} = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
-const service = new chrome.ServiceBuilder("C:\\Users\\Oleksandr_Halichenko\\WebstormProjects\\protractor-cucmber-boilerplate-po\\node_modules\\protractor\\node_modules\\webdriver-manager\\selenium\\chromedriver_74.0.3729.6.exe");
+const service = new chrome.ServiceBuilder(require("../node_modules/webdriver-manager-replacement/downloads/chromedriver.config.json").last);
 let driver;
 
 class TestPage extends SeleniumPage {

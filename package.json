@@ -1,6 +1,6 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "Implementation of page object patter for cucumber + protractor testing framework",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
     "test:protractor": "protractor ./test/protractor.conf.js",
     "test:webdriverio": "wdio ./test/webdriverio.conf.js",
     "test:selenium": "jest --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\" --testPathIgnorePatterns=\"abstractPage.test.js\" --testPathIgnorePatterns=\"pageMap.test.js\"",
-    "pretest:protractor": "webdriver-manager-replacement update --versions.chrome=76.0.3809.126",
+    "pretest:protractor": "webdriver-manager-replacement update --versions.chrome=80.0.3987.87",
     "build": "babel src -d lib",
     "prepublish": "npm run build"
   },
