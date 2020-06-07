@@ -18,20 +18,28 @@ class ParsedToken {
 
             this.allModifier = parsedTokens[1];
             this.modifier = parsedTokens[2];
-            this.index = parsedTokens[4] === "of"
-                ? (
+
+            /** parse of clause*/
+            if (parsedTokens[4] === "of") {
+                const extraOfCondition = (
                     value !== "FIRST" &&
                     value !== "LAST" &&
                     !regexp.PARTIAL_ARRAY_REGEXP.test(value) &&
                     !regexp.PARTIAL_MORE_LESS_REGEXP.test(value)
-                )
-                    ? Number.parseInt(value)
-                    : value : undefined;
-            this.innerText = parsedTokens[4] === "in"
-                ? this.modifier !== "/"
-                    ? value
-                    : value.replace(/\/$/, "")
-                : undefined;
+                );
+                if (extraOfCondition) {
+                    this.index = Number.parseInt(value);
+                } else {
+                    this.index = value;
+                }
+            } /** parse in clause*/
+            else if (parsedTokens[4] === "in") {
+                if (this.modifier !== "/") {
+                    this.innerText = value;
+                } else {
+                    this.innerText = value.replace(/\/$/, "");
+                }
+            }
             this.alias = parsedTokens[5];
         } else {
             this.alias = token;
