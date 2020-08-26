@@ -1,5 +1,5 @@
-const WebdriverIOPage = require("../lib/po/WebdriverIOPage");
-const Component = require("../lib/po/Component");
+const WebdriverIOPage = require("../src/po/WebdriverIOPage");
+const Component = require("../src/po/Component");
 const path = require("path");
 
 class TestPage extends WebdriverIOPage {

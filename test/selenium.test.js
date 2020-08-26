@@ -1,7 +1,7 @@
 const path = require("path");
-const SeleniumPage = require("../lib/po/SeleniumPage");
-const Component = require("../lib/po/Component");
-const {Builder, By, until} = require('selenium-webdriver');
+const SeleniumPage = require("../src/po/SeleniumPage");
+const Component = require("../src/po/Component");
+const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 const service = new chrome.ServiceBuilder(require("../node_modules/webdriver-manager-replacement/downloads/chromedriver.config.json").last);

@@ -1,7 +1,7 @@
 {
   "name": "@cucumber-e2e/po",
-  "version": "0.9.3",
-  "description": "Implementation of page object pattern for cucumber + protractor testing framework",
+  "version": "0.10.0-alpha1",
+  "description": "Implementation of page object pattern for cucumber testing framework",
   "main": "index.js",
   "scripts": {
     "docs": "jsdoc ./src/ -r -t ./node_modules/minami",
@@ -9,7 +9,7 @@
     "test:protractor": "protractor ./test/protractor.conf.js",
     "test:webdriverio": "wdio ./test/webdriverio.conf.js",
     "test:selenium": "jest --testPathIgnorePatterns=\"protractor.test.js\" --testPathIgnorePatterns=\"webdriverio.test.js\" --testPathIgnorePatterns=\"abstractPage.test.js\" --testPathIgnorePatterns=\"pageMap.test.js\"  --testPathIgnorePatterns=\"types.test.ts\"",
-    "pretest:protractor": "webdriver-manager-replacement update --versions.chrome=83.0.4103.39",
+    "wd:update": "webdriver-manager-replacement update --versions.chrome=83.0.4103.39",
     "build": "babel src -d lib",
     "prepublish": "npm run build"
   },
@@ -40,14 +40,14 @@
         "@babel/preset-env",
         {
           "targets": {
-            "node": "6"
+            "node": "8"
           }
         }
       ]
     ]
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.0.0"
   },
   "jest": {
     "transformIgnorePatterns": [
@@ -78,8 +78,8 @@
     "webdriverio": "^5.10.1"
   },
   "peerDependencies": {
-    "protractor": "^5.4.2",
+    "protractor": "^7.0.0",
     "selenium-webdriver": "^4.0.0-alpha.3",
-    "webdriverio": "^5.10.1"
+    "webdriverio": "^6.0.0"
   }
 }

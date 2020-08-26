@@ -1,5 +1,5 @@
-const ProtractorPage = require("../lib/po/ProtractorPage");
-const Component = require("../lib/po/Component");
+const ProtractorPage = require("../src/po/ProtractorPage.js");
+const Component = require("../src/po/Component.js");
 const path = require("path");
 
 class TestPage extends ProtractorPage {
@@ -40,7 +40,7 @@ describe("protractor tests", () => {
                 this.defineElement({
                     alias: "child element",
                     selector: "div"
-                })
+                });
             }
         }
 
@@ -49,6 +49,11 @@ describe("protractor tests", () => {
                 super({
                     alias: "component2",
                     selector: ".list-components"
+                });
+
+                this.defineElement({
+                    alias: "first li",
+                    selector: "li:nth-child(1)"
                 });
 
                 this.defineComponent({
@@ -172,4 +177,8 @@ describe("protractor tests", () => {
     it("get single element by js", async () => {
         expect(await testPage.getElement("single element js").getText()).toBe("text of single element");
     });
+
+    it('get element with skipping nodes', async () => {
+        expect(await testPage.getElement("first li").getText()).toBe("1");
+    })
 });

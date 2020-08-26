@@ -15,6 +15,4 @@ function getAllElementsByCssExactText(cssSelector, searchText, using) {
     return matches;
 }
 
-module.exports = {
-    getAllElementsByCssExactText
-};
+module.exports = getAllElementsByCssExactText;

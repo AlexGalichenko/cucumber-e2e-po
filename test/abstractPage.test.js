@@ -1,7 +1,7 @@
-const AbstractPage = require("../lib/po/AbstractPage");
+const Page = require("../lib/po/Page");
 const Component = require("../lib/po/Component");
 
-class TestPage extends AbstractPage {
+class TestPage extends Page {
     constructor() {
         super();
     }
