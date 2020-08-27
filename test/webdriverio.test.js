@@ -1,81 +1,12 @@
-const WebdriverIOPage = require("../lib/po/WebdriverIOPage");
-const Component = require("../lib/po/Component");
+const WebdriverIOPage = require("../src/po/WebdriverIOPage");
 const path = require("path");
+const pageObject = require('./pageObject.js');
 
-class TestPage extends WebdriverIOPage {
-    constructor() {
-        super();
-    }
-}
-
-const testPage = new TestPage();
+const testPage = pageObject(WebdriverIOPage);
 
 describe("webdriverIO tests", () => {
     beforeAll(async () => {
         await browser.url(path.resolve("./test/testPage.html"));
-
-        class MyComponent extends Component {
-            constructor() {
-                super({
-                    alias: "component",
-                    selector: ".container"
-                });
-
-                this.defineElement({
-                    alias: "child element",
-                    selector: ".child-item"
-                });
-            }
-        }
-
-        class ChildComponent extends Component {
-            constructor() {
-                super({
-                    alias: "child component",
-                    selector: ".l-component",
-                    isCollection: true
-                });
-
-                this.defineElement({
-                    alias: "child element",
-                    selector: "div"
-                })
-            }
-        }
-
-        class MyComponent2 extends Component {
-            constructor() {
-                super({
-                    alias: "component2",
-                    selector: ".list-components"
-                });
-
-                this.defineComponent({
-                    alias: "child component",
-                    component: new ChildComponent()
-                });
-            }
-        }
-
-        testPage.defineComponent({
-            alias: "component2",
-            component: new MyComponent2()
-        });
-
-        testPage.defineElement({
-            alias: "single element",
-            selector: ".single-element"
-        });
-
-        testPage.defineComponent({
-            alias: "component",
-            component: new MyComponent()
-        });
-
-        testPage.defineCollection({
-            alias: "collection",
-            selector: "ol > li"
-        });
     });
 
     it("get single element", async function() {
@@ -151,12 +82,20 @@ describe("webdriverIO tests", () => {
         expect((await testPage.getElement("all /Third/ in collection > all @Third in this")).length).toBe(1);
     });
 
-    // it("verify did you mean feature", async function () {
-    //     try {
-    //         await testPage.getElement("component2 > children component > child element")
-    //     } catch (e) {
-    //         expect(e.message).toEqual("There is no such element: 'children component'\nDid you mean:\nchild component");
-    //     }
-    // });
+    it("verify did you mean feature", async function () {
+        try {
+            await testPage.getElement("component2 > children component > child element")
+        } catch (e) {
+            expect(e.message).toEqual("There is no such element: 'children component'\nDid you mean:\nchild component");
+        }
+    });
+
+    it('get single element by js', async () => {
+        expect(await (await testPage.getElement('single element js')).getText()).toBe('text of single element');
+    });
+
+    it('get element with skipping nodes', async () => {
+        expect(await (await testPage.getElement('first li')).getText()).toBe('1');
+    })
 
 });

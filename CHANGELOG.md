@@ -1,3 +1,5 @@
+## 0.10.0 - 2020-08-27
+* skip nodes feature
 ## 0.9.3 - 2020-06-07
 * added d.ts files
 * fixed vulnerabilities

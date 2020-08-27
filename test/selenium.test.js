@@ -1,103 +1,23 @@
 const path = require("path");
-const SeleniumPage = require("../lib/po/SeleniumPage");
-const Component = require("../lib/po/Component");
-const {Builder, By, until} = require('selenium-webdriver');
+const SeleniumPage = require("../src/po/SeleniumPage");
+const { Builder } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
+const pageObject = require('./pageObject.js');
 
 const service = new chrome.ServiceBuilder(require("../node_modules/webdriver-manager-replacement/downloads/chromedriver.config.json").last);
-let driver;
+const driver = new Builder()
+    .forBrowser('chrome')
+    .setChromeService(service)
+    .setChromeOptions(new chrome.Options().headless())
+    .build();
 
-class TestPage extends SeleniumPage {
-    constructor() {
-        super();
-    }
-}
-
-const testPage = new TestPage();
+const testPage = pageObject(SeleniumPage);
 
 describe("selenium tests", () => {
     jest.setTimeout(30000);
     beforeAll(async () => {
-        driver = await new Builder()
-            .forBrowser('chrome')
-            .setChromeService(service)
-            .build();
-
+        testPage.setDriver(await driver);
         await driver.get(path.resolve("./test/testPage.html"));
-
-        class MyComponent extends Component {
-            constructor() {
-                super({
-                    alias: "component",
-                    selector: ".container"
-                });
-
-                this.defineElement({
-                    alias: "child element",
-                    selector: ".child-item"
-                });
-            }
-        }
-
-        class ChildComponent extends Component {
-            constructor() {
-                super({
-                    alias: "child component",
-                    selector: ".l-component",
-                    isCollection: true
-                });
-
-                this.defineElement({
-                    alias: "child element",
-                    selector: "div"
-                })
-            }
-        }
-
-        class MyComponent2 extends Component {
-            constructor() {
-                super({
-                    alias: "component2",
-                    selector: ".list-components"
-                });
-
-                this.defineComponent({
-                    alias: "child component",
-                    component: new ChildComponent()
-                });
-            }
-        }
-
-        testPage.defineComponent({
-            alias: "component2",
-            component: new MyComponent2()
-        });
-
-        testPage.defineElement({
-            alias: "single element",
-            selector: ".single-element"
-        });
-
-        testPage.defineComponent({
-            alias: "component",
-            component: new MyComponent()
-        });
-
-        testPage.defineCollection({
-            alias: "collection",
-            selector: "ol > li"
-        });
-
-        testPage.defineElement({
-            alias: "single element js",
-            selector: function () {
-                return document.querySelector(".single-element")
-            },
-            // selector: "return document.querySelector(\".single-element\")",
-            selectorType: "js"
-        });
-
-        testPage.setDriver(driver);
     });
 
     it("get single element", async function() {
@@ -177,13 +97,21 @@ describe("selenium tests", () => {
         expect(await (await testPage.getElement("single element js")).getText()).toBe("text of single element");
     });
 
-    // it("verify did you mean feature", async function () {
-    //     try {
-    //         await testPage.getElement("component2 > children component > child element")
-    //     } catch (e) {
-    //         expect(e.message).toEqual("There is no such element: 'children component'\nDid you mean:\nchild component");
-    //     }
-    // });
+    it("verify did you mean feature", async function () {
+        try {
+            await testPage.getElement("component2 > children component > child element")
+        } catch (e) {
+            expect(e.message).toEqual("There is no such element: 'children component'\nDid you mean:\nchild component");
+        }
+    });
+
+    it('get single element by js', async () => {
+        expect(await (await testPage.getElement('single element js')).getText()).toBe('text of single element');
+    });
+
+    it('get element with skipping nodes', async () => {
+        expect(await (await testPage.getElement('first li')).getText()).toBe('1');
+    })
 
     afterAll(async () => {
         await driver.quit()

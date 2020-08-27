@@ -1,7 +1,7 @@
-const AbstractPageMap = require("../lib/page_map/PageMap");
-const AbstractPage = require("../lib/po/AbstractPage");
+const AbstractPageMap = require("../src/page_map/PageMap");
+const Page = require("../src/po/Page");
 
-const page = new AbstractPage();
+const page = new Page();
 class PageMap extends AbstractPageMap {
     constructor() {
         super();

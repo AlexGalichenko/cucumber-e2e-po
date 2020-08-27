@@ -1,17 +1,10 @@
-const AbstractPage = require("./AbstractPage");
-const ComponentNode = require("./ComponentNode");
-const ParsedToken = require("./ParsedToken");
-const NoSuchElementException = require("./exception/NoSuchElementException");
-const regexp = require("./helpers/regexp");
+const Page = require('./Page');
+const parseTokens = require('./parseTokens.js');
+class SeleniumPage extends Page {
 
-/**
- * @extends {AbstractPage}
- */
-class SeleniumPage extends AbstractPage {
-
-    constructor() {
-        super();
-        this.driver = null;
+    constructor(driver) {
+        super(driver);
+        this.driver = driver;
     }
 
     /**
@@ -28,190 +21,133 @@ class SeleniumPage extends AbstractPage {
     /**
      * Get element by key
      * @param {string} key - key
-     * @return {*} - webdriverIO element
+     * @return {Promise<any>} - webdriverIO element
      * @override
      */
-    getElement(key) {
-        const tokens = ParsedToken.getTokens(key);
-        const firstToken = tokens.shift();
-        const startNode = new ComponentNode(
-            this._getWebdriverIOElement(null, this, firstToken),
-            this._getComponent(this, firstToken)
-        );
-        const seleniumElement = tokens.reduce((current, token) => {
-            return new ComponentNode(
-                this._getWebdriverIOElement(current.element, current.component, token),
-                this._getComponent(current.component, token)
-            )
-        }, startNode);
-
-        return seleniumElement.element;
-    }
-
-    /**
-     * Get webdriverIO single element or collection of elements or element from collection
-     * @param {*} currentElement - current element
-     * @param {WebdriverIOAbstractPage|Component} currentComponent - current component
-     * @param {string} token - token to get new element
-     * @return {*} - return new element
-     * @private
-     */
-    _getWebdriverIOElement(currentElement, currentComponent, token) {
-        const parsedToken = new ParsedToken(token);
-        if (parsedToken.isElementOfCollection()) {
-            return this._getElementOfCollection(currentElement, currentComponent, parsedToken)
-        } else {
-            return this._getElementOrCollection(currentElement, currentComponent, parsedToken)
-        }
-    }
-
-    /**
-     * Get webdriverIO element by index or text
-     * @param {*} currentElement - current element
-     * @param {Component} currentComponent - current component
-     * @param {ParsedToken} parsedToken - parsed token
-     * @return {*} - new webdriverIO element
-     * @private
-     */
-    _getElementOfCollection(currentElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = {css: "html"};
-        const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentElement ? currentElement : this.driver.findElement(ROOT_ELEMENT_SELECTOR);
-        return rootElement.then(element => {
-            if (newComponent.isCollection) {
-                const elementsCollection = parsedToken.alias !== "this"
-                    ? element.findElements(this._getSelector(newComponent))
-                    : Promise.resolve(element);
-                if (parsedToken.hasTokenIn()) return this._getElementOfCollectionByText(elementsCollection, parsedToken);
-                if (parsedToken.hasTokenOf()) return this._getElementOfCollectionByIndex(elementsCollection, parsedToken);
-            } else {
-                throw new Error(`${parsedToken.alias} is not collection`)
-            }
+    async getElement(path) {
+        const tokens = parseTokens(path);
+        const elementList = this.getElementList(tokens);
+        const root = await this.driver.findElement({
+            using: 'css selector',
+            value: 'html'
         });
+        const reducer = (frameworkElement, elementDefiniton) => this.getFrameworkElement(frameworkElement, elementDefiniton);
+        return elementList.reduce(reducer, root);
+    }
+    getFrameworkElement(frameworkElement, elementDefiniton) {
+        if (elementDefiniton.selectorType === 'js') return this.driver.findElement(this.getSelector(elementDefiniton));
+        if (!elementDefiniton.token || !elementDefiniton.token.type) return this.getChildElement(frameworkElement, elementDefiniton);
+        if (elementDefiniton.token.byIndex) return this.getElementFromCollectionByIndex(frameworkElement, elementDefiniton);
+        if (elementDefiniton.token.byText) return this.getElementFromCollectionByText(frameworkElement, elementDefiniton);
     }
 
-    /**
-     * Get element from collection by text
-     * @param elementsCollection - collection to select from
-     * @param parsedToken - token to select element
-     * @return {ElementFinder|ElementArrayFinder} - new protractor element
-     * @private
-     */
-    _getElementOfCollectionByText(elementsCollection, parsedToken) {
-        return elementsCollection.then(
-            collection => {
-                const promises = collection
-                    .map(element => element.getText()
-                        .then(text => {
-                            if (parsedToken.isPartialMatch()) return text.includes(parsedToken.innerText);
-                            if (parsedToken.isExactMatch()) return text === parsedToken.innerText;
-                            if (parsedToken.isRegexp()) return new RegExp(parsedToken.innerText).test(text);
-                        }));
-                return Promise.all(promises).then(results => {
-                    if (!parsedToken.hasAllModifier()) return collection.find((element, index) => results[index]);
-                    return collection.filter((element, index) => results[index])
-                })
-            }
+    async getChildElement(frameworkElement, elementDefiniton) {
+        const selector = this.getSelector(elementDefiniton);
+        const element = await frameworkElement;
+        if (elementDefiniton.token.isThis) return element
+        if (elementDefiniton.isCollection) return element.findElements(selector);
+        if (element.length) return Promise.all(element.map(child => child.findElement(selector)))
+        return element.findElement(selector)
+    }
+
+    
+    async getElementFromCollectionByIndex(frameworkElement, elementDefiniton) {
+        const collection = await this.getRootElement(frameworkElement, elementDefiniton);
+        if (elementDefiniton.token.byExactIndex) return this.getElementFromCollectionByExactIndex(collection, elementDefiniton)
+        if (elementDefiniton.token.byRangeBetween) return this.getElementsFromCollectionByIndexFilter(
+            collection,
+            (_, i) => i >= elementDefiniton.token.value.startIndex - 1 && i <= elementDefiniton.token.value.endIndex - 1
+        )
+        if (elementDefiniton.token.byRangeGreater) return this.getElementsFromCollectionByIndexFilter(
+            collection,
+            (_, i) => i > elementDefiniton.token.value.startIndex - 1
+        )
+        if (elementDefiniton.token.byRangeLess) return this.getElementsFromCollectionByIndexFilter(
+            collection,
+            (_, i) => i < elementDefiniton.token.value.endIndex - 1
         )
     }
 
-    /**
-     * Get element from collection by index
-     * @param elementsCollection - collection to select from
-     * @param parsedToken - token to select element
-     * @return {ElementFinder|ElementArrayFinder} - new protractor element
-     * @private
-     */
-    _getElementOfCollectionByIndex(elementsCollection, parsedToken) {
-        if (typeof parsedToken.index === "number") return elementsCollection.then(collection => collection[parsedToken.index - 1]);
-        if (parsedToken.index === "FIRST") return elementsCollection.then(collection => collection[0]);
-        if (parsedToken.index === "LAST") return elementsCollection.then(collection => collection[collection.length - 1]);
-        if (regexp.PARTIAL_ARRAY_REGEXP.test(parsedToken.index)) {
-            const [startIndex, endIndex] = parsedToken.index.split("-");
-            return elementsCollection.then(collection => collection.filter((_, i) => i >= startIndex - 1 && i <= endIndex - 1));
-        }
-        if (regexp.PARTIAL_MORE_LESS_REGEXP.test(parsedToken.index)) {
-            const [operator, index] = [parsedToken.index[0], +parsedToken.index.slice(1)];
-            switch (operator) {
-                case ">": return elementsCollection.then(collection => collection.filter((_, i) => i > index - 1));
-                case "<": return elementsCollection.then(collection => collection.filter((_, i) => i < index - 1));
-                default: throw new Error(`Operator ${operator} is not defined`)
-            }
-        }
+    getElementFromCollectionByExactIndex(collection, elementDefiniton) {
+        if (elementDefiniton.token.value === 'LAST') return collection[collection.length - 1]
+        return collection[elementDefiniton.token.value - 1]
     }
 
-    /**
-     * Get webdriverIO element or collection
-     * @param {*} currentElement - current element
-     * @param {Component} currentComponent - current component
-     * @param {ParsedToken} parsedToken - alias
-     * @return {*} - new webdriverIO element
-     * @private
-     */
-    _getElementOrCollection(currentElement, currentComponent, parsedToken) {
-        const ROOT_ELEMENT_SELECTOR = {css: "html"};
-        const newComponent = this._getComponent(currentComponent, parsedToken.alias);
-        const rootElement = currentElement ? currentElement : this.driver.findElement(ROOT_ELEMENT_SELECTOR);
-        if (newComponent.isCollection) {
-            return rootElement.then(element => element.findElements(this._getSelector(newComponent)));
-        } else {
-            return rootElement.then(element => {
-                if (element.length) {
-                    return Promise.all(element.map(item => item.findElement(this._getSelector(newComponent))))
-                } else {
-                    return element.findElement(this._getSelector(newComponent))
-                }
-            });
-        }
+    getElementsFromCollectionByIndexFilter(collection, filterFn) {
+        return collection.filter(filterFn)
     }
 
-    /**
-     * Function for verifying and returning element
-     * @param {AbstractPage|Component} currentComponent - current component
-     * @param {string} token - token to create new compoenent
-     * @returns {Component} - new component
-     * @throws {Error}
-     * @private
-     */
-    _getComponent(currentComponent, token) {
-        const parsedToken = new ParsedToken(token);
-        if (parsedToken.alias === "this") return currentComponent;
-        if (currentComponent.elements.has(parsedToken.alias)) return currentComponent.elements.get(parsedToken.alias);
-        throw new NoSuchElementException(parsedToken.alias, currentComponent);
+    async getElementFromCollectionByText(frameworkElement, elementDefiniton) {
+        const collection = await this.getRootElement(frameworkElement, elementDefiniton);
+        if (elementDefiniton.token.byPartialText) return this.getElementFromCollectionByTextFilter(
+            collection,
+            elementDefiniton,
+            text => text.includes(elementDefiniton.token.value)
+        )
+        if (elementDefiniton.token.byExactText) return this.getElementFromCollectionByTextFilter(
+            collection,
+            elementDefiniton,
+            text => text === elementDefiniton.token.value
+        )
+        if (elementDefiniton.token.byRegExp) return this.getElementFromCollectionByTextFilter(
+            collection,
+            elementDefiniton,
+            text => elementDefiniton.token.value.test(text)
+        )
+    }
+
+    async getElementFromCollectionByTextFilter(collection, elementDefiniton, filterFn) {
+        const isAll = elementDefiniton.token.hasAllModifier;
+        return this.getElementByFilter(collection, isAll, filterFn);
+    }
+
+    async getElementByFilter(collection, isAll, filterFn) {
+        let filteredCollection = [];
+        for (const element of collection) {
+            const text = await element.getText();
+            if (filterFn(text)) filteredCollection.push(element)
+        }
+        if (isAll) return filteredCollection
+        return filteredCollection[0]
+    }
+
+    getRootElement(frameworkElement, elementDefiniton) {
+        const selector = this.getSelector(elementDefiniton);
+        return !elementDefiniton.token.isThis ? frameworkElement.findElements(selector) : frameworkElement;
     }
 
     /**
      * Resolve element by location strategy
      * @param {Element|Collection|Component} element - element to get selector
-     * @return {WebDriverLocator|ProtractorLocator|Object} - by selector
+     * @return {WebDriverLocator|Object} - by selector
      * @throws {Error}
      * @private
      */
-    _getSelector(element) {
+    getSelector(element) {
         switch (element.selectorType) {
-            case "css": return {
+            case 'css': return {
                 using: 'css selector',
                 value: element.selector
             };
-            case "xpath": return {
+            case 'xpath': return {
                 using: 'xpath',
                 value: element.selector
             };
             //todo fix bug that will allow to pass params into function
-            case "js": return function(context) {
+            case 'js': return function(context) {
                 const driver = context.driver_ ||context;
                 return driver.executeScript.apply(driver, [element.selector]);
             };
-            case "android": return {
-                using: "-android uiautomator",
+            case 'android': return {
+                using: '-android uiautomator',
                 value: element.selector
             };
-            case "ios": return {
-                using: "-ios uiautomation",
+            case 'ios': return {
+                using: '-ios uiautomation',
                 value: element.selector
             };
-            case "accessibilityId": return {
-                using: "accessibility id",
+            case 'accessibilityId': return {
+                using: 'accessibility id',
                 value: element.selector
             };
             default: throw new Error(`Selector type ${element.selectorType} is not defined`);

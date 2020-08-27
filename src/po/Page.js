@@ -1,10 +1,11 @@
-const Element = require("./Element");
-const Collection = require("./Collection");
-const regexp = require("./helpers/regexp");
+const Element = require("./Element.js");
+const Collection = require("./Collection.js");
+const NoSuchElementException = require("./exception/NoSuchElementException.js");
+
 /**
  * @abstract
  */
-class AbstractPage {
+class Page {
 
     constructor() {
         this.elements = new Map();
@@ -82,6 +83,52 @@ class AbstractPage {
         }
     }
 
+    /**
+     * Get list of definition by provided tokens
+     * @protected
+     * @param {Array<Token>} tokens
+     * @returns {Array<Element|Collection|Component>} - list of elements
+     */
+    getElementList(tokens) {
+        return tokens.reduce((data, token) => {
+            const element = this.findNode(data.currentElement, token);
+            if (!element) throw new NoSuchElementException(token.elementName, data.currentElement);
+            return { result: [...data.result, ...element.path], currentElement: element}
+        }, { result: [], currentElement: this }).result
+    }
+
+    /**
+     * find node in case of skipped tokens
+     * @private
+     * @param {Element|Collection|Component} currentNode 
+     * @param {Token} token 
+     * @param {Array<Element|Collection|Component>} [path] - path to necessary node
+     * @returns {Array<Element|Collection|Component>} - list of components
+     */
+    findNode(currentNode, token, path = []) {
+        if (token.isThis) {
+            const thisNode = Object.assign({}, currentNode);
+            thisNode.token = token;
+            thisNode.path = [...path, thisNode]
+            return thisNode
+        }
+        if (currentNode.elements) {
+            if (currentNode.elements.has(token.elementName)) {
+                const element = currentNode.elements.get(token.elementName);
+                element.path = [...path, element];
+                element.token = token;
+                return element
+            }
+            else {
+                const childComponents = [...currentNode.elements.values()].filter(component => component.elements);
+                for (const component of childComponents) {
+                    return this.findNode(component, token, [...path, component]);
+                }
+            }
+        }
+        return null
+    }
+
 }
 
-module.exports = AbstractPage;
+module.exports = Page;

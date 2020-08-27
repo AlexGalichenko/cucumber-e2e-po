@@ -1,10 +1,10 @@
-const AbstractPage = require("./AbstractPage");
+const Page = require('./Page.js');
 
 /**
  * Component
  * @type {Component}
  */
-class Component extends AbstractPage {
+class Component extends Page {
 
     /**
      * Constructor of component or collection of components
@@ -27,8 +27,8 @@ class Component extends AbstractPage {
 
         this.alias = component.alias;
         this.selector = component.selector;
-        this.selectorType = component.selectorType || "css";
-        this.text = component.text ? component.text : "";
+        this.selectorType = component.selectorType || 'css';
+        this.text = component.text ? component.text : '';
         this.isCollection = Boolean(component.isCollection);
     }
 
