@@ -2,7 +2,6 @@ const Page = require('./Page');
 const { element } = require('protractor');
 const by = require('./helpers/extendedBy.js');
 const parseTokens = require('./parseTokens.js');
-const Collection = require('./Collection');
 
 class ProtractorPage extends Page {
 
@@ -46,9 +45,18 @@ class ProtractorPage extends Page {
     getElementFromCollectionByIndex(frameworkElement, elementDefiniton) {
         const collection = this.getRootElement(frameworkElement, elementDefiniton);
         if (elementDefiniton.token.byExactIndex) return this.getElementFromCollectionByExactIndex(collection, elementDefiniton)
-        if (elementDefiniton.token.byRangeBetween) return this.getElementsFromCollectionByRange(collection, elementDefiniton)
-        if (elementDefiniton.token.byRangeGreater) return this.getElementsFromCollectionByGreater(collection, elementDefiniton)
-        if (elementDefiniton.token.byRangeLess) return this.getElementsFromCollectionByLess(collection, elementDefiniton)
+        if (elementDefiniton.token.byRangeBetween) return this.getElementsFromCollectionByIndexFilter(
+            collection,
+            (_, i) => i >= elementDefiniton.token.value.startIndex - 1 && i <= elementDefiniton.token.value.endIndex - 1
+        )
+        if (elementDefiniton.token.byRangeGreater) return this.getElementsFromCollectionByIndexFilter(
+            collection,
+            (_, i) => i > elementDefiniton.token.value.startIndex - 1
+        )
+        if (elementDefiniton.token.byRangeLess) return this.getElementsFromCollectionByIndexFilter(
+            collection,
+            (_, i) => i < elementDefiniton.token.value.endIndex - 1
+        )
     }
 
     getElementFromCollectionByExactIndex(collection, elementDefiniton) {
@@ -56,21 +64,8 @@ class ProtractorPage extends Page {
         return collection.get(elementDefiniton.token.value - 1)
     }
 
-    getElementsFromCollectionByRange(collection, elementDefiniton) {
-        const { startIndex, endIndex } = elementDefiniton.token.value;
-        const filterFn = (_, i) => i >= startIndex - 1 && i <= endIndex - 1;
-        return collection.filter(filterFn)
-    }
 
-    getElementsFromCollectionByGreater(collection, elementDefiniton) {
-        const { startIndex } = elementDefiniton.token.value;
-        const filterFn = (_, i) => i > startIndex - 1;
-        return collection.filter(filterFn)
-    }
-
-    getElementsFromCollectionByLess(collection, elementDefiniton) {
-        const { endIndex } = elementDefiniton.token.value;
-        const filterFn = (_, i) => i < endIndex - 1;
+    getElementsFromCollectionByIndexFilter(collection, filterFn) {
         return collection.filter(filterFn)
     }
 

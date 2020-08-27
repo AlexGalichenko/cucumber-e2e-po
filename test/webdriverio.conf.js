@@ -3,13 +3,14 @@ exports.config = {
     runner: 'local',
     specs: ['./test/webdriverio.test.js'],
     framework: 'jasmine',
-    services: ['selenium-standalone'],
+    services: ['chromedriver'],
+    hostname: 'localhost',
+    port: 4444,
     maxInstances: 1,
     capabilities: [{
-        maxInstances: 1,
-        browserName: "chrome",
-        "goog:chromeOptions": {
-            args: ["--headless"]
+        browserName: 'chrome',
+        'goog:chromeOptions': {
+            args: ['--headless']
         }
     }],
     bail: 0,
@@ -18,5 +19,5 @@ exports.config = {
         defaultTimeoutInterval: 20000,
     },
     sync: false,
-    logLevel: "trace",
+    logLevel: 'trace',
 };

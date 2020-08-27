@@ -1,5 +1,5 @@
-const Page = require("../lib/po/Page");
-const Component = require("../lib/po/Component");
+const Page = require("../src/po/Page");
+const Component = require("../src/po/Component");
 
 class TestPage extends Page {
     constructor() {
